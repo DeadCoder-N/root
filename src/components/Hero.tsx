@@ -96,7 +96,7 @@ export default function Hero() {
           <div className="relative fade-in">
             <div className="hero-image-frame">
               <img
-                src="/IMG_20251008_163230.jpg"
+                src="/root/IMG_20251008_163230.jpg"
                 alt="Nitesh Sawardekar"
                 className="w-full h-auto object-cover"
               />

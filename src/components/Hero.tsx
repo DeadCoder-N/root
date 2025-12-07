@@ -34,10 +34,10 @@ export default function Hero() {
       <div className="container mx-auto px-6 relative z-10">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="space-y-8 fade-in">
-            <div className="inline-flex items-center space-x-2 bg-tertiary/50 backdrop-blur-sm px-4 py-2 rounded-full border border-accent-teal/30">
+            {/* <div className="inline-flex items-center space-x-2 bg-tertiary/50 backdrop-blur-sm px-4 py-2 rounded-full border border-accent-teal/30">
               <Terminal className="w-4 h-4 text-accent-teal" />
               <span className="text-sm text-text-secondary">Available for opportunities</span>
-            </div>
+            </div> */}
 
             <h1 className="text-5xl md:text-7xl font-bold leading-tight">
               Hi, I'm <span className="gradient-text">Nitesh</span>

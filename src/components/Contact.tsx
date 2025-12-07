@@ -25,6 +25,15 @@ export default function Contact() {
     setErrorMessage('');
 
     try {
+      if (!supabase) {
+        // Fallback: simulate success for demo purposes
+        console.log('Contact form submission:', formData);
+        setStatus('success');
+        setFormData({ name: '', email: '', subject: '', message: '' });
+        setTimeout(() => setStatus('idle'), 5000);
+        return;
+      }
+
       const { error } = await supabase
         .from('contact_messages')
         .insert([
@@ -53,19 +62,19 @@ export default function Contact() {
     {
       icon: Mail,
       label: 'Email',
-      value: 'your.email@example.com',
-      href: 'mailto:your.email@example.com',
+      value: 'niteshsawardekar972@gmail.com',
+      href: 'mailto:niteshsawardekar972@gmail.com',
     },
     {
       icon: Phone,
       label: 'Phone',
-      value: '+1 (555) 123-4567',
-      href: 'tel:+15551234567',
+      value: '+91 8454806491',
+      href: 'tel:+91 8454806491',
     },
     {
       icon: MapPin,
       label: 'Location',
-      value: 'Mumbai, India',
+      value: 'Kalyan, India',
       href: null,
     },
   ];

@@ -241,6 +241,8 @@ code, .mono {
   overflow: hidden;
   background: linear-gradient(135deg, var(--accent-teal) 0%, var(--accent-purple) 100%);
   padding: 3px;
+  max-width: 400px;
+  margin: 0 auto;
 }
 
 .hero-image-frame::before {

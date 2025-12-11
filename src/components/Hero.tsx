@@ -61,10 +61,19 @@ export default function Hero() {
               <a href="#contact" className="btn-primary">
                 Get In Touch
               </a>
-              <a href="/Nitesh_Sawardekar_Resume.pdf" download className="btn-secondary flex items-center space-x-2">
+              <button 
+                onClick={() => {
+                  const link = document.createElement('a');
+                  link.href = '/root/Nitesh_Sawardekar_Resume.pdf';
+                  link.download = 'Nitesh_Sawardekar_Resume.pdf';
+                  link.click();
+                  window.open('/root/Nitesh_Sawardekar_Resume.pdf', '_blank');
+                }}
+                className="btn-secondary flex items-center space-x-2"
+              >
                 <FileText className="w-5 h-5" />
                 <span>Download CV</span>
-              </a>
+              </button>
             </div>
 
             <div className="flex items-center space-x-6">
@@ -100,10 +109,6 @@ export default function Hero() {
                 alt="Nitesh Sawardekar"
                 className="w-full h-auto object-cover"
               />
-            </div>
-            <div className="absolute -bottom-6 -right-6 bg-gradient-to-r from-accent-teal to-accent-purple p-6 rounded-lg shadow-2xl">
-              <p className="text-4xl font-bold">5+</p>
-              <p className="text-sm text-text-secondary">Projects Completed</p>
             </div>
           </div>
         </div>

@@ -22,7 +22,7 @@ export default function InteractiveTerminal() {
       '  whoami      - Display user info',
       '  clear       - Clear terminal',
       '  hack        - Try the secret command',
-    ],
+    ], 
     about: [
       'Nitesh Sawardekar (Dead Coder)',
       'Computer Engineering Student',
@@ -44,10 +44,11 @@ export default function InteractiveTerminal() {
       '5. Password Strength Analyzer - Advanced security checker',
     ],
     contact: [
-      'Email: your.email@example.com',
+      'Email: niteshsawardekar972@gmail.com',
+      'Phone No: +91 8454806491',
       'Location: Mumbai, India',
-      'GitHub: github.com/yourprofile',
-      'LinkedIn: linkedin.com/in/yourprofile',
+      'GitHub: https://github.com/DeadCoder-N',
+      'LinkedIn: https://www.linkedin.com/in/nitesh-sawardekar-39708a310/',
     ],
     whoami: ['guest@portfolio-terminal'],
     ls: ['about.txt', 'skills.md', 'projects.json', 'contact.info', 'resume.pdf'],

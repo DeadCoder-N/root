@@ -183,7 +183,7 @@ export default function InteractiveTerminal() {
 
             <div className="bg-tertiary px-4 py-2 border-t border-accent-teal/30">
               <p className="text-xs text-text-muted">
-                Tip: Try commands like "help", "about", "skills", or even "hack"
+                Tip: Try commands like "help"!!!
               </p>
             </div>
           </div>

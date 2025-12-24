@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Dead_Coderr")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+da0477155ddfb3fc0e983520a71236ce03b47931")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e306c26f2d20a573ffdc7a0c7903535c605919ab")]
 [assembly: System.Reflection.AssemblyProductAttribute("Dead_Coderr")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Dead_Coderr")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

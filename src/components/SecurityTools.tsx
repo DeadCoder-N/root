@@ -199,17 +199,6 @@ Recommendation: Upgrade to WPA3`,
             </div>
           ))}
         </div>
-
-        <div className="mt-16 text-center fade-in">
-          <div className="glass-card p-8 max-w-3xl mx-auto">
-            <h3 className="text-2xl font-bold mb-4">Educational Purpose Only</h3>
-            <p className="text-text-muted leading-relaxed">
-              These demonstrations are for educational purposes to showcase understanding of cybersecurity concepts.
-              All tools and techniques should only be used on systems you own or have explicit permission to test.
-              Unauthorized access to computer systems is illegal and unethical.
-            </p>
-          </div>
-        </div>
       </div>
     </section>
   );

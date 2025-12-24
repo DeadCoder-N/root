@@ -100,11 +100,11 @@ export default function Skills() {
           {skillCategories.map((category, index) => (
             <div
               key={index}
-              className="glass-card p-6 space-y-6 fade-in"
-              style={{ animationDelay: `${index * 0.1}s` }}
+              className="glass-card p-6 space-y-6 fade-in-stagger"
+              style={{ animationDelay: `${index * 0.15}s` }}
             >
               <div className="flex items-center space-x-4">
-                <div className={`w-12 h-12 bg-gradient-to-r ${category.color} rounded-lg flex items-center justify-center`}>
+                <div className={`w-12 h-12 bg-gradient-to-r ${category.color} rounded-lg flex items-center justify-center transition-transform duration-300 hover:scale-110 hover:rotate-12`}>
                   <category.icon className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold">{category.title}</h3>
@@ -119,8 +119,11 @@ export default function Skills() {
                     </div>
                     <div className="h-2 bg-tertiary rounded-full overflow-hidden">
                       <div
-                        className={`h-full bg-gradient-to-r ${category.color} rounded-full transition-all duration-1000 ease-out`}
-                        style={{ width: `${skill.level}%` }}
+                        className={`h-full bg-gradient-to-r ${category.color} rounded-full transition-all duration-1000 ease-out hover:shadow-lg`}
+                        style={{ 
+                          width: `${skill.level}%`,
+                          animation: `slideInRight 1s ease-out ${skillIndex * 0.1}s both`
+                        }}
                       ></div>
                     </div>
                   </div>

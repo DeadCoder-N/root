@@ -37,7 +37,7 @@ export default function About() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6 fade-in">
+          <div className="space-y-6 fade-in-left">
             <p className="text-text-secondary leading-relaxed">
               I'm a Computer Engineering student with a strong focus on cybersecurity and frontend development.
               My journey in tech has been driven by curiosity about how systems work and how to make them more secure.
@@ -51,7 +51,7 @@ export default function About() {
               contributing to open-source projects, and sharing my knowledge through technical blogs.
             </p>
 
-            <div className="grid grid-cols-2 gap-4 pt-6">
+            <div className="grid grid-cols-2 gap-4 pt-6 fade-in-scale">
               <div className="bg-tertiary/50 p-4 rounded-lg border border-accent-teal/30">
                 <p className="text-3xl font-bold text-accent-teal">50+</p>
                 <p className="text-text-muted text-sm">CTF Challenges</p>
@@ -71,11 +71,12 @@ export default function About() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 fade-in">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 fade-in-right">
             {highlights.map((item, index) => (
               <div
                 key={index}
-                className="glass-card p-6 space-y-4"
+                className="glass-card p-6 space-y-4 fade-in-stagger"
+                style={{ transitionDelay: `${index * 100}ms` }}
               >
                 <div className="w-12 h-12 bg-gradient-to-r from-accent-teal to-accent-purple rounded-lg flex items-center justify-center">
                   <item.icon className="w-6 h-6 text-white" />

@@ -81,7 +81,7 @@ export default function Hero() {
                 href="https://github.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-text-muted hover:text-accent-teal transition-colors transform hover:scale-110"
+                className="text-text-muted hover:text-accent-teal transition-all duration-300 transform hover:scale-125"
               >
                 <Github className="w-6 h-6" />
               </a>
@@ -89,13 +89,13 @@ export default function Hero() {
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-text-muted hover:text-accent-teal transition-colors transform hover:scale-110"
+                className="text-text-muted hover:text-accent-teal transition-all duration-300 transform hover:scale-125"
               >
                 <Linkedin className="w-6 h-6" />
               </a>
               <a
                 href="mailto:your.email@example.com"
-                className="text-text-muted hover:text-accent-teal transition-colors transform hover:scale-110"
+                className="text-text-muted hover:text-accent-teal transition-all duration-300 transform hover:scale-125"
               >
                 <Mail className="w-6 h-6" />
               </a>
@@ -103,11 +103,11 @@ export default function Hero() {
           </div>
 
           <div className="relative fade-in">
-            <div className="hero-image-frame">
+            <div className="hero-image-frame hover:scale-105 transition-transform duration-500">
               <img
                 src="/root/ME!.jpg"
                 alt="Nitesh Sawardekar"
-                className="w-full h-auto object-cover"
+                className="w-full h-auto object-cover transition-transform duration-700 hover:scale-110"
               />
             </div>
           </div>

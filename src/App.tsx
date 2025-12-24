@@ -11,23 +11,41 @@ import InteractiveTerminal from './components/InteractiveTerminal';
 import Blog from './components/Blog';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
+import ParticleSystem from './components/ParticleSystem';
+import CustomCursor from './components/CustomCursor';
+import AnimatedBackground from './components/AnimatedBackground';
+import LoadingScreen from './components/LoadingScreen';
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const observers = new IntersectionObserver(
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible');
+          } else {
+            entry.target.classList.remove('visible');
           }
         });
       },
-      { threshold: 0.1 }
+      { 
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
+      }
     );
 
-    document.querySelectorAll('.fade-in').forEach((el) => observers.observe(el));
+    const animatedElements = document.querySelectorAll('[class*="fade-in"]');
+    animatedElements.forEach((el) => observer.observe(el));
 
     const handleSmoothScroll = (e: Event) => {
       const target = e.target as HTMLAnchorElement;
@@ -45,6 +63,8 @@ function App() {
     });
 
     return () => {
+      const animatedElements = document.querySelectorAll('[class*="fade-in"]');
+      animatedElements.forEach((el) => observer.unobserve(el));
       document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
         anchor.removeEventListener('click', handleSmoothScroll);
       });
@@ -64,20 +84,26 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-primary text-text-primary">
-      <Header isDark={isDarkMode} toggleTheme={toggleTheme} />
-      <Hero />
-      <About />
-      <Skills />
-      <Experience />
-      <Projects />
-      <CTFShowcase />
-      <SecurityTools />
-      <InteractiveTerminal />
-      <Blog />
-      <Contact />
-      <Footer />
-    </div>
+    <>
+      {isLoading && <LoadingScreen />}
+      <div className="min-h-screen bg-primary text-text-primary">
+        <AnimatedBackground />
+        <ParticleSystem />
+        <CustomCursor />
+        <Header isDark={isDarkMode} toggleTheme={toggleTheme} />
+        <Hero />
+        <About />
+        <Skills />
+        <Experience />
+        <Projects />
+        <CTFShowcase />
+        <SecurityTools />
+        <InteractiveTerminal />
+        <Blog />
+        <Contact />
+        <Footer />
+      </div>
+    </>
   );
 }
 

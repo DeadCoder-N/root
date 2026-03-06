@@ -64,10 +64,10 @@ export default function Hero() {
               <button 
                 onClick={() => {
                   const link = document.createElement('a');
-                  link.href = '/root/Nitesh_Sawardekar_Resume.pdf';
+                  link.href = '/Nitesh_Sawardekar_Resume.pdf';
                   link.download = 'Nitesh_Sawardekar_Resume.pdf';
                   link.click();
-                  window.open('/root/Nitesh_Sawardekar_Resume.pdf', '_blank');
+                  window.open('/Nitesh_Sawardekar_Resume.pdf', '_blank');
                 }}
                 className="btn-secondary flex items-center space-x-2"
               >
@@ -105,7 +105,7 @@ export default function Hero() {
           <div className="relative fade-in">
             <div className="hero-image-frame hover:scale-105 transition-transform duration-500">
               <img
-                src="/root/ME!.jpg"
+                src="/ME!.jpg"
                 alt="Nitesh Sawardekar"
                 className="w-full h-auto object-cover transition-transform duration-700 hover:scale-110"
               />

@@ -49,3 +49,8 @@ ENV/
 *.pdf
 reports/*.pdf
 */reports/*.pdf
+
+# Shell scripts
+start-all-tools.sh
+stop-all-tools.sh
+restart-all-tools.sh

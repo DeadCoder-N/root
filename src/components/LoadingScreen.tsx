@@ -17,75 +17,77 @@ export default function LoadingScreen() {
   ];
 
   useEffect(() => {
+    /* 
+     * SOUND FEATURE DISABLED - 2024-12-20 05:15 IST
+     * Reason: Auto-playing audio creates poor UX - intrusive for users, 
+     * violates browser autoplay policies, and causes accessibility issues.
+     * Users should have explicit control over audio playback.
+     */
+    
     // Create soft ambient loading sound
-    const createAmbientSound = () => {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const gainNode = audioContext.createGain();
-      const filterNode = audioContext.createBiquadFilter();
-      
-      // Create multiple oscillators for rich ambient sound
-      const oscillators = [];
-      const frequencies = [220, 330, 440]; // Soft harmonic frequencies
-      
-      for (let i = 0; i < frequencies.length; i++) {
-        const oscillator = audioContext.createOscillator();
-        const oscGain = audioContext.createGain();
-        
-        oscillator.frequency.value = frequencies[i];
-        oscillator.type = 'sine'; // Soft sine wave
-        
-        // Very soft volume that fades in
-        oscGain.gain.setValueAtTime(0, audioContext.currentTime);
-        oscGain.gain.linearRampToValueAtTime(0.02 / frequencies.length, audioContext.currentTime + 0.5);
-        
-        oscillator.connect(oscGain);
-        oscGain.connect(filterNode);
-        oscillators.push({ oscillator, gain: oscGain });
-      }
-      
-      // Low-pass filter for warmth
-      filterNode.type = 'lowpass';
-      filterNode.frequency.value = 800;
-      filterNode.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      // Master volume - very soft
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-      
-      // Start all oscillators
-      oscillators.forEach(({ oscillator }) => {
-        oscillator.start(audioContext.currentTime);
-      });
-      
-      return { audioContext, oscillators, gainNode };
-    };
+    // const createAmbientSound = () => {
+    //   const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    //   const gainNode = audioContext.createGain();
+    //   const filterNode = audioContext.createBiquadFilter();
+    //   
+    //   const oscillators = [];
+    //   const frequencies = [220, 330, 440];
+    //   
+    //   for (let i = 0; i < frequencies.length; i++) {
+    //     const oscillator = audioContext.createOscillator();
+    //     const oscGain = audioContext.createGain();
+    //     
+    //     oscillator.frequency.value = frequencies[i];
+    //     oscillator.type = 'sine';
+    //     
+    //     oscGain.gain.setValueAtTime(0, audioContext.currentTime);
+    //     oscGain.gain.linearRampToValueAtTime(0.02 / frequencies.length, audioContext.currentTime + 0.5);
+    //     
+    //     oscillator.connect(oscGain);
+    //     oscGain.connect(filterNode);
+    //     oscillators.push({ oscillator, gain: oscGain });
+    //   }
+    //   
+    //   filterNode.type = 'lowpass';
+    //   filterNode.frequency.value = 800;
+    //   filterNode.connect(gainNode);
+    //   gainNode.connect(audioContext.destination);
+    //   
+    //   gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    //   
+    //   oscillators.forEach(({ oscillator }) => {
+    //     oscillator.start(audioContext.currentTime);
+    //   });
+    //   
+    //   return { audioContext, oscillators, gainNode };
+    // };
 
     // Create beep sound for interactions
-    const createBeepSound = (frequency: number, duration: number) => {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      oscillator.frequency.value = frequency;
-      oscillator.type = 'sine'; // Changed to sine for softer sound
-      
-      gainNode.gain.setValueAtTime(0.05, audioContext.currentTime); // Reduced volume
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
-      
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + duration);
-    };
+    // const createBeepSound = (frequency: number, duration: number) => {
+    //   const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    //   const oscillator = audioContext.createOscillator();
+    //   const gainNode = audioContext.createGain();
+    //   
+    //   oscillator.connect(gainNode);
+    //   gainNode.connect(audioContext.destination);
+    //   
+    //   oscillator.frequency.value = frequency;
+    //   oscillator.type = 'sine';
+    //   
+    //   gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+    //   gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+    //   
+    //   oscillator.start(audioContext.currentTime);
+    //   oscillator.stop(audioContext.currentTime + duration);
+    // };
 
     // Start ambient sound
     let ambientAudio: any = null;
-    try {
-      ambientAudio = createAmbientSound();
-    } catch (error) {
-      console.log('Audio context not available');
-    }
+    // try {
+    //   ambientAudio = createAmbientSound();
+    // } catch (error) {
+    //   console.log('Audio context not available');
+    // }
 
     // Progress animation
     const progressInterval = setInterval(() => {
@@ -102,9 +104,9 @@ export default function LoadingScreen() {
     const messageInterval = setInterval(() => {
       setCurrentMessage(prev => {
         const next = (prev + 1) % bootMessages.length;
-        if (ambientAudio) {
-          createBeepSound(600 + Math.random() * 200, 0.08); // Softer random beep
-        }
+        // if (ambientAudio) {
+        //   createBeepSound(600 + Math.random() * 200, 0.08);
+        // }
         return next;
       });
     }, 300);
@@ -112,28 +114,26 @@ export default function LoadingScreen() {
     // Glitch effect
     const glitchInterval = setInterval(() => {
       setShowGlitch(true);
-      if (ambientAudio) {
-        createBeepSound(300, 0.03); // Softer glitch sound
-      }
+      // if (ambientAudio) {
+      //   createBeepSound(300, 0.03);
+      // }
       setTimeout(() => setShowGlitch(false), 100);
     }, 800);
 
     // Final exit
     const exitTimer = setTimeout(() => {
-      if (ambientAudio) {
-        // Fade out ambient sound
-        ambientAudio.gainNode.gain.linearRampToValueAtTime(0, ambientAudio.audioContext.currentTime + 0.5);
-        createBeepSound(880, 0.2); // Softer success sound
-        
-        // Stop ambient sound after fade
-        setTimeout(() => {
-          ambientAudio.oscillators.forEach(({ oscillator }: any) => {
-            try {
-              oscillator.stop();
-            } catch (e) {}
-          });
-        }, 500);
-      }
+      // if (ambientAudio) {
+      //   ambientAudio.gainNode.gain.linearRampToValueAtTime(0, ambientAudio.audioContext.currentTime + 0.5);
+      //   createBeepSound(880, 0.2);
+      //   
+      //   setTimeout(() => {
+      //     ambientAudio.oscillators.forEach(({ oscillator }: any) => {
+      //       try {
+      //         oscillator.stop();
+      //       } catch (e) {}
+      //     });
+      //   }, 500);
+      // }
       setTimeout(() => setIsVisible(false), 300);
     }, 2000);
 
@@ -144,13 +144,13 @@ export default function LoadingScreen() {
       clearTimeout(exitTimer);
       
       // Clean up ambient sound
-      if (ambientAudio) {
-        ambientAudio.oscillators.forEach(({ oscillator }: any) => {
-          try {
-            oscillator.stop();
-          } catch (e) {}
-        });
-      }
+      // if (ambientAudio) {
+      //   ambientAudio.oscillators.forEach(({ oscillator }: any) => {
+      //     try {
+      //       oscillator.stop();
+      //     } catch (e) {}
+      //   });
+      // }
     };
   }, []);
 

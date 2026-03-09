@@ -1,0 +1,731 @@
+#!/usr/bin/env python3
+"""
+XSS Scanner PDF Report Generator
+"""
+
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
+from reportlab.lib.enums import TA_CENTER
+from datetime import datetime
+import html
+
+class PDFReportGenerator:
+    def __init__(self):
+        self.styles = getSampleStyleSheet()
+        self._add_custom_styles()
+    
+    def _add_custom_styles(self):
+        self.styles.add(ParagraphStyle(
+            name='CustomTitle',
+            parent=self.styles['Heading1'],
+            fontSize=24,
+            textColor=colors.HexColor('#0891b2'),
+            spaceAfter=30,
+            alignment=TA_CENTER
+        ))
+        
+        self.styles.add(ParagraphStyle(
+            name='SectionHeader',
+            parent=self.styles['Heading2'],
+            fontSize=16,
+            textColor=colors.HexColor('#0891b2'),
+            spaceAfter=12,
+            spaceBefore=12
+        ))
+    
+    def _calculate_risk_score(self, vulnerabilities):
+        """Calculate overall risk score 0-100"""
+        if not vulnerabilities:
+            return 0
+        
+        severity_scores = {'CRITICAL': 25, 'HIGH': 15, 'MEDIUM': 8, 'LOW': 3}
+        total_score = sum(severity_scores.get(v['severity'], 0) for v in vulnerabilities)
+        return min(100, total_score)
+    
+    def generate(self, report_data, output_path):
+        """Generate PDF report"""
+        doc = SimpleDocTemplate(output_path, pagesize=letter)
+        story = []
+        
+        # Title
+        story.append(Paragraph("XSS Security Report", self.styles['CustomTitle']))
+        story.append(Spacer(1, 0.3*inch))
+        
+        # Scan Info
+        info_data = [
+            ['Scan Date:', report_data['scan_date']],
+            ['Target URL:', report_data['target']],
+            ['Parameters Tested:', str(report_data.get('parameters_tested', 0))],
+            ['Vulnerabilities Found:', str(report_data['total_vulnerabilities'])]
+        ]
+        
+        info_table = Table(info_data, colWidths=[2*inch, 4.5*inch])
+        info_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f0f9ff')),
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ('GRID', (0, 0), (-1, -1), 1, colors.grey)
+        ]))
+        story.append(info_table)
+        story.append(Spacer(1, 0.5*inch))
+        
+        # Executive Summary
+        if report_data['vulnerabilities']:
+            story.append(Paragraph("📊 Executive Summary Dashboard", self.styles['SectionHeader']))
+            
+            risk_score = self._calculate_risk_score(report_data['vulnerabilities'])
+            risk_level = 'CRITICAL' if risk_score >= 75 else 'HIGH' if risk_score >= 50 else 'MEDIUM' if risk_score >= 25 else 'LOW'
+            
+            critical_count = sum(1 for v in report_data['vulnerabilities'] if v['severity'] == 'CRITICAL')
+            high_count = sum(1 for v in report_data['vulnerabilities'] if v['severity'] == 'HIGH')
+            medium_count = sum(1 for v in report_data['vulnerabilities'] if v['severity'] == 'MEDIUM')
+            
+            dashboard_data = [
+                ['Security Risk Score:', f'{risk_score}/100 ({risk_level})', 'Total Vulnerabilities:', str(report_data['total_vulnerabilities'])],
+                ['Critical Issues:', str(critical_count), 'High Issues:', str(high_count)],
+                ['Medium Issues:', str(medium_count), 'Parameters Tested:', str(report_data.get('parameters_tested', 0))]
+            ]
+            
+            dashboard_table = Table(dashboard_data, colWidths=[1.8*inch, 1.8*inch, 1.8*inch, 1.8*inch])
+            dashboard_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#dc2626')),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#fef3c7')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+                ('TOPPADDING', (0, 0), (-1, -1), 12),
+                ('GRID', (0, 0), (-1, -1), 1, colors.grey)
+            ]))
+            story.append(dashboard_table)
+            story.append(Spacer(1, 0.3*inch))
+        
+        # Summary
+        if report_data['total_vulnerabilities'] > 0:
+            story.append(Paragraph("⚠️ VULNERABILITIES DETECTED", self.styles['SectionHeader']))
+            story.append(Paragraph(
+                f"Found <b>{report_data['total_vulnerabilities']}</b> XSS vulnerabilities. "
+                "Your application is at risk of client-side attacks. Immediate action required!",
+                self.styles['BodyText']
+            ))
+        else:
+            story.append(Paragraph("✅ NO VULNERABILITIES FOUND", self.styles['SectionHeader']))
+            story.append(Paragraph(
+                "No XSS vulnerabilities detected. Your application appears secure against basic XSS attacks.",
+                self.styles['BodyText']
+            ))
+        
+        story.append(Spacer(1, 0.3*inch))
+        
+        # Vulnerabilities
+        if report_data['vulnerabilities']:
+            story.append(PageBreak())
+            story.append(Paragraph("Vulnerability Details", self.styles['SectionHeader']))
+            story.append(Spacer(1, 0.2*inch))
+            
+            for i, vuln in enumerate(report_data['vulnerabilities'], 1):
+                story.append(Paragraph(f"<b>Vulnerability #{i}</b>", self.styles['Heading3']))
+                
+                vuln_data = [
+                    ['Parameter:', vuln['parameter']],
+                    ['Type:', vuln['type']],
+                    ['Severity:', vuln['severity']],
+                    ['Payload Used:', html.escape(vuln['payload'])],
+                    ['Evidence:', vuln['evidence']]
+                ]
+                
+                vuln_table = Table(vuln_data, colWidths=[1.5*inch, 5*inch])
+                vuln_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#fef3c7')),
+                    ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 9),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+                    ('VALIGN', (0, 0), (-1, -1), 'TOP')
+                ]))
+                story.append(vuln_table)
+                story.append(Spacer(1, 0.2*inch))
+                
+                # Manual Testing Guide
+                story.append(Paragraph("<b>🧪 Manual Testing Guide:</b>", self.styles['Heading3']))
+                
+                manual_steps = [
+                    "<b>Step 1: Open the vulnerable URL</b>",
+                    f"<font face='Courier' size='7' color='blue'>{vuln.get('url', 'N/A')}</font>",
+                    "",
+                    "<b>Step 2: What to look for</b>",
+                    "• Check if an alert box appears",
+                    "• Open browser console (F12) and check for JavaScript execution",
+                    "• View page source and search for your payload unescaped",
+                    "",
+                    "<b>Step 3: Confirm vulnerability</b>",
+                    "If you see an alert or the payload in HTML unescaped, the vulnerability is CONFIRMED."
+                ]
+                
+                for step in manual_steps:
+                    story.append(Paragraph(step, self.styles['BodyText']))
+                story.append(Spacer(1, 0.3*inch))
+                
+                # Proof of Concept
+                story.append(Paragraph("<b>💥 Proof of Concept:</b>", self.styles['Heading3']))
+                story.append(Paragraph(f"1. Vulnerable URL: {vuln.get('url', 'N/A')}", self.styles['BodyText']))
+                story.append(Paragraph(f"2. Payload: {html.escape(vuln['payload'])}", self.styles['BodyText']))
+                story.append(Paragraph(f"3. Result: {vuln['evidence']}", self.styles['BodyText']))
+                story.append(Spacer(1, 0.3*inch))
+            
+            # Business Impact Section
+            story.append(PageBreak())
+            story.append(Paragraph("💰 Business Impact Analysis", self.styles['SectionHeader']))
+            story.append(Spacer(1, 0.2*inch))
+            
+            impact_data = [
+                ['🚨 Risk Category', 'Potential Impact'],
+                ['Account Takeover', 'Attackers steal session cookies and hijack user accounts'],
+                ['Data Theft', 'Sensitive user data, credentials, payment info stolen'],
+                ['Reputation Damage', 'Loss of customer trust, negative press coverage'],
+                ['Financial Loss', '$50,000 - $500,000 average breach cost + legal fees'],
+                ['Malware Distribution', 'Your site used to spread malware to visitors'],
+                ['Compliance Violations', 'GDPR, PCI-DSS, HIPAA violations and fines']
+            ]
+            
+            impact_table = Table(impact_data, colWidths=[2*inch, 4.5*inch])
+            impact_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#dc2626')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#fee2e2')),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+                ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP')
+            ]))
+            story.append(impact_table)
+            story.append(Spacer(1, 0.3*inch))
+        
+        # Fix Recommendations
+        story.append(PageBreak())
+        story.append(Paragraph("🛠️ How to Fix (Simple English)", self.styles['SectionHeader']))
+        story.append(Spacer(1, 0.2*inch))
+        
+        story.append(Paragraph("<b>What is XSS?</b>", self.styles['Heading3']))
+        story.append(Paragraph(
+            "XSS (Cross-Site Scripting) allows attackers to inject malicious JavaScript into your web pages. "
+            "When users visit the page, the script executes in their browser, stealing cookies, session tokens, or performing actions as that user.",
+            self.styles['BodyText']
+        ))
+        story.append(Spacer(1, 0.2*inch))
+        
+        story.append(Paragraph("<b>How to Fix It (3 Steps):</b>", self.styles['Heading3']))
+        
+        fix_steps = [
+            "<b>1. Escape All User Input</b><br/>"
+            "Convert special characters to HTML entities:<br/>"
+            "• &lt; becomes &amp;lt;<br/>"
+            "• &gt; becomes &amp;gt;<br/>"
+            "• \" becomes &amp;quot;<br/>"
+            "• ' becomes &amp;#x27;<br/>"
+            "Use built-in escaping functions in your framework.",
+            
+            "<b>2. Use Content Security Policy (CSP)</b><br/>"
+            "Add HTTP header:<br/>"
+            "<font face='Courier'>Content-Security-Policy: default-src 'self'; script-src 'self'</font><br/>"
+            "This blocks inline scripts and external script sources.",
+            
+            "<b>3. Validate Input</b><br/>"
+            "• Only allow expected characters<br/>"
+            "• Reject &lt;, &gt;, \", ', &lt;script&gt; tags<br/>"
+            "• Use whitelist validation"
+        ]
+        
+        for step in fix_steps:
+            story.append(Paragraph(step, self.styles['BodyText']))
+            story.append(Spacer(1, 0.15*inch))
+        
+        # AI Prompts Section
+        story.append(PageBreak())
+        story.append(Paragraph("🤖 AI Prompts to Fix Your Code", self.styles['SectionHeader']))
+        story.append(Spacer(1, 0.2*inch))
+        
+        story.append(Paragraph(
+            "<b>Copy-paste these prompts into ChatGPT, Claude, Amazon Q, or GitHub Copilot to automatically fix your code:</b>",
+            self.styles['BodyText']
+        ))
+        story.append(Spacer(1, 0.2*inch))
+        
+        # Get unique parameters from vulnerabilities
+        unique_params = list(set(v['parameter'] for v in report_data.get('vulnerabilities', [])))
+        params_list = ', '.join(unique_params) if unique_params else 'user input parameters'
+        
+        ai_prompts = [
+            {
+                'title': '📝 Prompt 1: General XSS Fix',
+                'prompt': f'I have XSS vulnerabilities in my web application. The vulnerable parameters are: {params_list}. '
+                          'Please review my code and fix all XSS vulnerabilities by properly escaping user input. '
+                          'Use the appropriate escaping method for my framework (htmlspecialchars for PHP, escape() for Flask, '
+                          'DOMPurify for React, etc.). Show me the fixed code with comments explaining the changes.'
+            },
+            {
+                'title': '📝 Prompt 2: Add Content Security Policy',
+                'prompt': 'Add a Content Security Policy (CSP) header to my application to prevent XSS attacks. '
+                          'Configure it to: 1) Only allow scripts from the same origin, 2) Block inline scripts, '
+                          '3) Block eval() and similar functions. Show me how to implement this in my backend framework '
+                          '(Flask/Express/Laravel/Django) with proper configuration.'
+            },
+            {
+                'title': '📝 Prompt 3: Input Validation',
+                'prompt': f'Add input validation for these parameters: {params_list}. '
+                          'Create a whitelist validation function that: 1) Rejects special characters like <, >, ", \', '
+                          '2) Limits input length, 3) Only allows alphanumeric characters and spaces. '
+                          'Show me the validation code and how to integrate it into my application.'
+            },
+            {
+                'title': '📝 Prompt 4: Framework-Specific Fix',
+                'prompt': 'I\'m using [YOUR_FRAMEWORK] (e.g., React, Flask, Laravel, Express). '
+                          f'Fix XSS vulnerabilities in parameters: {params_list}. '
+                          'Use framework best practices and built-in security features. '
+                          'Show me before/after code with explanations.'
+            },
+            {
+                'title': '📝 Prompt 5: Complete Security Audit',
+                'prompt': 'Perform a complete XSS security audit on my code. '
+                          'Check for: 1) Unescaped user input in HTML, 2) Dangerous functions like dangerouslySetInnerHTML, '
+                          '3) Missing CSP headers, 4) Weak input validation. '
+                          'Provide a detailed report with fixes for each issue found.'
+            }
+        ]
+        
+        for prompt_item in ai_prompts:
+            story.append(Paragraph(f"<b>{prompt_item['title']}</b>", self.styles['Heading3']))
+            story.append(Spacer(1, 0.1*inch))
+            
+            # Create a box for the prompt
+            prompt_table = Table([[prompt_item['prompt']]], colWidths=[6.5*inch])
+            prompt_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#f0f9ff')),
+                ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+                ('TOPPADDING', (0, 0), (-1, -1), 12),
+                ('LEFTPADDING', (0, 0), (-1, -1), 12),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+                ('BOX', (0, 0), (-1, -1), 2, colors.HexColor('#0891b2')),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP')
+            ]))
+            story.append(prompt_table)
+            story.append(Spacer(1, 0.25*inch))
+        
+        story.append(Paragraph(
+            "<b>💡 Pro Tip:</b> Copy the entire prompt, paste it into your AI assistant, then paste your vulnerable code. "
+            "The AI will analyze and fix it automatically!",
+            self.styles['BodyText']
+        ))
+        story.append(Spacer(1, 0.3*inch))
+        
+        # Code Examples
+        story.append(PageBreak())
+        story.append(Paragraph("💻 Code Examples: Before & After", self.styles['SectionHeader']))
+        story.append(Spacer(1, 0.2*inch))
+        
+        code_examples = [
+            {
+                'language': 'Python (Flask)',
+                'vulnerable': '# ❌ VULNERABLE\\n@app.route("/search")\\ndef search():\\n    query = request.args.get("q")\\n    return f"<h1>Results for: {query}</h1>"  # DANGEROUS!',
+                'secure': '# ✅ SECURE\\nfrom markupsafe import escape\\n@app.route("/search")\\ndef search():\\n    query = request.args.get("q")\\n    return f"<h1>Results for: {escape(query)}</h1>"  # SAFE!'
+            },
+            {
+                'language': 'JavaScript (React)',
+                'vulnerable': '// ❌ VULNERABLE\\nfunction Search({ query }) {\\n  return <div dangerouslySetInnerHTML={{__html: query}} />;  // DANGEROUS!\\n}',
+                'secure': '// ✅ SECURE\\nfunction Search({ query }) {\\n  return <div>{query}</div>;  // SAFE! React auto-escapes\\n}'
+            },
+            {
+                'language': 'PHP',
+                'vulnerable': '// ❌ VULNERABLE\\n$query = $_GET["q"];\\necho "<h1>Results for: $query</h1>";  // DANGEROUS!',
+                'secure': '// ✅ SECURE\\n$query = $_GET["q"];\\necho "<h1>Results for: " . htmlspecialchars($query) . "</h1>";  // SAFE!'
+            }
+        ]
+        
+        for example in code_examples:
+            story.append(Paragraph(f"<b>{example['language']}</b>", self.styles['Heading3']))
+            story.append(Spacer(1, 0.1*inch))
+            
+            story.append(Paragraph("<font color='red'><b>Vulnerable Code:</b></font>", self.styles['BodyText']))
+            story.append(Paragraph(
+                f"<font face='Courier' size='7'>{example['vulnerable']}</font>",
+                self.styles['BodyText']
+            ))
+            story.append(Spacer(1, 0.15*inch))
+            
+            story.append(Paragraph("<font color='green'><b>Secure Code:</b></font>", self.styles['BodyText']))
+            story.append(Paragraph(
+                f"<font face='Courier' size='7'>{example['secure']}</font>",
+                self.styles['BodyText']
+            ))
+            story.append(Spacer(1, 0.25*inch))
+        
+        # ============================================
+        # OLD CODE - Commented out 2024
+        # Reason: Adding new professional sections
+        # ============================================
+        # doc.build(story)
+        # print(f"PDF report generated: {output_path}")
+        
+        # Business Impact Analysis
+        story.append(PageBreak())
+        story.extend(self._create_business_impact_tables())
+        
+        # Manual Testing Procedures
+        story.append(PageBreak())
+        story.extend(self._create_manual_testing_procedures())
+        
+        # AI Prompts
+        story.append(PageBreak())
+        story.extend(self._create_xss_ai_prompts())
+        
+        # Code Examples
+        story.append(PageBreak())
+        story.extend(self._create_framework_code_examples())
+        
+        # Build PDF
+        doc.build(story)
+        print(f"PDF report generated: {output_path}")
+
+    def _create_business_impact_tables(self):
+        """4 comprehensive business impact tables"""
+        elements = []
+        
+        elements.append(Paragraph("📊 BUSINESS IMPACT ANALYSIS", self.styles['SectionHeader']))
+        elements.append(Spacer(1, 0.2*inch))
+        
+        # Financial Impact
+        financial_data = [
+            ['Impact Category', 'Low', 'Medium', 'High', 'Critical'],
+            ['Account Takeover Cost', '$50K-$100K', '$100K-$400K', '$400K-$1.5M', '$1.5M-$8M'],
+            ['Malware Cleanup', '$10K-$30K', '$30K-$100K', '$100K-$350K', '$350K-$1M'],
+            ['Customer Refunds', '$5K-$20K', '$20K-$100K', '$100K-$400K', '$400K-$2M'],
+            ['Security Upgrades', '$15K-$40K', '$40K-$150K', '$150K-$500K', '$500K-$2M']
+        ]
+        
+        financial_table = Table(financial_data, colWidths=[1.5*inch, 1.25*inch, 1.25*inch, 1.25*inch, 1.25*inch])
+        financial_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#dc2626')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        
+        elements.append(Paragraph("<b>1. Financial Impact</b>", self.styles['Heading3']))
+        elements.append(financial_table)
+        elements.append(Spacer(1, 0.3*inch))
+        
+        # Operational Impact
+        operational_data = [
+            ['Metric', 'Low', 'Medium', 'High', 'Critical'],
+            ['Incident Response', '4-8 hours', '8-24 hours', '1-3 days', '3-10 days'],
+            ['Dev Hours to Fix', '15-30 hrs', '30-60 hrs', '60-120 hrs', '120-300 hrs'],
+            ['Affected Users', '10-100', '100-1K', '1K-10K', '10K-1M+'],
+            ['Service Disruption', '1-2 hours', '2-6 hours', '6-24 hours', '1-5 days']
+        ]
+        
+        operational_table = Table(operational_data, colWidths=[1.5*inch, 1.25*inch, 1.25*inch, 1.25*inch, 1.25*inch])
+        operational_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0891b2')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        
+        elements.append(Paragraph("<b>2. Operational Impact</b>", self.styles['Heading3']))
+        elements.append(operational_table)
+        elements.append(Spacer(1, 0.3*inch))
+        
+        # Reputational Impact
+        reputational_data = [
+            ['Impact Area', 'Low', 'Medium', 'High', 'Critical'],
+            ['User Trust Loss', '5-15%', '15-35%', '35-60%', '60-85%'],
+            ['Social Media Backlash', 'Minor mentions', 'Trending topic', 'Viral negative', 'PR crisis'],
+            ['Recovery Period', '1-3 months', '3-6 months', '6-12 months', '1-3 years'],
+            ['Competitive Impact', 'Minimal', 'Moderate', 'Significant', 'Severe']
+        ]
+        
+        reputational_table = Table(reputational_data, colWidths=[1.5*inch, 1.25*inch, 1.25*inch, 1.25*inch, 1.25*inch])
+        reputational_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#7c3aed')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        
+        elements.append(Paragraph("<b>3. Reputational Impact</b>", self.styles['Heading3']))
+        elements.append(reputational_table)
+        elements.append(Spacer(1, 0.3*inch))
+        
+        # Compliance Impact
+        compliance_data = [
+            ['Regulation', 'Violation Type', 'Penalty Range', 'Additional Consequences'],
+            ['GDPR', 'User data theft', '€20M or 4% revenue', 'Mandatory breach notification'],
+            ['PCI-DSS', 'Payment data leak', '$5K-$500K/month', 'Card processing ban'],
+            ['CCPA', 'Privacy violation', '$2.5K-$7.5K/user', 'Class action lawsuits'],
+            ['SOC 2', 'Security control fail', 'Cert revocation', 'Customer contract breach'],
+            ['ISO 27001', 'Info security breach', 'Cert suspension', 'Audit failures']
+        ]
+        
+        compliance_table = Table(compliance_data, colWidths=[1.2*inch, 1.4*inch, 1.7*inch, 2*inch])
+        compliance_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#ea580c')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 7),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE')
+        ]))
+        
+        elements.append(Paragraph("<b>4. Compliance Impact</b>", self.styles['Heading3']))
+        elements.append(compliance_table)
+        elements.append(Spacer(1, 0.2*inch))
+        
+        return elements
+    
+    def _create_manual_testing_procedures(self):
+        """Detailed manual testing guide with 10-15 steps"""
+        elements = []
+        
+        elements.append(Paragraph("🧪 MANUAL TESTING GUIDE", self.styles['SectionHeader']))
+        elements.append(Paragraph(
+            "Step-by-step instructions to manually verify XSS vulnerabilities:",
+            self.styles['BodyText']
+        ))
+        elements.append(Spacer(1, 0.2*inch))
+        
+        # Test 1: Reflected XSS
+        elements.append(Paragraph("<b>Test 1: Reflected XSS (10 steps)</b>", self.styles['Heading3']))
+        reflected_steps = [
+            '1. Open browser DevTools (F12) and go to Console tab',
+            '2. Navigate to target page with input parameter',
+            '3. Enter test payload: <script>alert(\"XSS\")</script>',
+            '4. Submit form or update URL parameter',
+            '5. Check if alert box appears (vulnerability confirmed)',
+            '6. View page source (Ctrl+U) and search for payload',
+            '7. Check if payload appears unescaped in HTML',
+            '8. Test with encoded payload: %3Cscript%3Ealert(1)%3C/script%3E',
+            '9. Try alternative payloads: <img src=x onerror=alert(1)>',
+            '10. Document: URL, parameter, payload, and screenshot'
+        ]
+        for step in reflected_steps:
+            elements.append(Paragraph(step, self.styles['BodyText']))
+        elements.append(Spacer(1, 0.3*inch))
+        
+        # Test 2: Stored XSS
+        elements.append(Paragraph("<b>Test 2: Stored XSS (10 steps)</b>", self.styles['Heading3']))
+        stored_steps = [
+            '1. Find input fields that store data (comments, profiles, posts)',
+            '2. Enter XSS payload: <script>alert(document.cookie)</script>',
+            '3. Submit and save the data',
+            '4. Navigate away from the page',
+            '5. Return to page where data is displayed',
+            '6. Check if alert appears on page load',
+            '7. Open page in incognito/private window',
+            '8. Verify payload executes for other users',
+            '9. Check database to see if payload is stored',
+            '10. Test persistence: logout, login, check again'
+        ]
+        for step in stored_steps:
+            elements.append(Paragraph(step, self.styles['BodyText']))
+        elements.append(Spacer(1, 0.3*inch))
+        
+        # Test 3: DOM-based XSS
+        elements.append(Paragraph("<b>Test 3: DOM-based XSS (10 steps)</b>", self.styles['Heading3']))
+        dom_steps = [
+            '1. Open DevTools Console and Network tabs',
+            '2. Look for JavaScript that reads URL parameters',
+            '3. Find document.location, window.location usage',
+            '4. Test payload in URL fragment: #<script>alert(1)</script>',
+            '5. Check if JavaScript processes the fragment',
+            '6. Try innerHTML injection: #<img src=x onerror=alert(1)>',
+            '7. Test with hash: #<svg onload=alert(1)>',
+            '8. Monitor Console for JavaScript errors',
+            '9. Check if payload executes without server request',
+            '10. Verify by checking Network tab (no server call)'
+        ]
+        for step in dom_steps:
+            elements.append(Paragraph(step, self.styles['BodyText']))
+        elements.append(Spacer(1, 0.3*inch))
+        
+        # Test 4: CSP Bypass
+        elements.append(Paragraph("<b>Test 4: Content Security Policy Check (10 steps)</b>", self.styles['Heading3']))
+        csp_steps = [
+            '1. Open DevTools Network tab',
+            '2. Load target page and click on main document',
+            '3. Check Response Headers for Content-Security-Policy',
+            '4. If missing, XSS protection is weak',
+            '5. If present, analyze CSP directives',
+            '6. Look for unsafe-inline or unsafe-eval',
+            '7. Check for wildcard sources (*)',
+            '8. Test if CSP blocks inline scripts',
+            '9. Try CSP bypass: <link rel=prefetch href=//evil.com>',
+            '10. Use CSP Evaluator tool: csp-evaluator.withgoogle.com'
+        ]
+        for step in csp_steps:
+            elements.append(Paragraph(step, self.styles['BodyText']))
+        elements.append(Spacer(1, 0.3*inch))
+        
+        # Test 5: Filter Bypass
+        elements.append(Paragraph("<b>Test 5: XSS Filter Bypass (15 steps)</b>", self.styles['Heading3']))
+        bypass_steps = [
+            '1. Test basic payload: <script>alert(1)</script>',
+            '2. If blocked, try case variation: <ScRiPt>alert(1)</ScRiPt>',
+            '3. Try encoding: &lt;script&gt;alert(1)&lt;/script&gt;',
+            '4. Test event handlers: <img src=x onerror=alert(1)>',
+            '5. Try SVG: <svg onload=alert(1)>',
+            '6. Test iframe: <iframe src=javascript:alert(1)>',
+            '7. Try data URI: <a href=data:text/html,<script>alert(1)</script>>',
+            '8. Test with null byte: <script>\\x00alert(1)</script>',
+            '9. Try Unicode: <script>\\u0061lert(1)</script>',
+            '10. Test HTML entities: <img src=x onerror=&#97;lert(1)>',
+            '11. Try nested tags: <<script>script>alert(1)<</script>/script>',
+            '12. Test with comments: <script><!---->alert(1)</script>',
+            '13. Try polyglot: jaVasCript:/*-/*`/*\\`/*\\\'/*\\"/**/(/* */oNcliCk=alert() )//%0D%0A%0d%0a//</stYle/</titLe/</teXtarEa/</scRipt/--!>\\x3csVg/<sVg/oNloAd=alert()//',
+            '14. Test mutation XSS: <noscript><p title=\"</noscript><img src=x onerror=alert(1)>\">',
+            '15. Document all successful bypasses'
+        ]
+        for step in bypass_steps:
+            elements.append(Paragraph(step, self.styles['BodyText']))
+        elements.append(Spacer(1, 0.2*inch))
+        
+        return elements
+    
+    def _create_xss_ai_prompts(self):
+        """7 XSS-specific AI prompts"""
+        elements = []
+        
+        elements.append(Paragraph("🤖 AI PROMPTS FOR XSS FIXES", self.styles['SectionHeader']))
+        elements.append(Paragraph(
+            "Copy these prompts to ChatGPT, Claude, Amazon Q, or GitHub Copilot:",
+            self.styles['BodyText']
+        ))
+        elements.append(Spacer(1, 0.2*inch))
+        
+        prompts = [
+            {
+                'title': 'Prompt 1: Add Output Encoding',
+                'text': 'Review my code and add proper output encoding to prevent XSS. For every place where user input is displayed in HTML, add context-aware encoding: HTML entity encoding for HTML context, JavaScript encoding for JS context, URL encoding for URLs. Use framework built-in functions (escape(), htmlspecialchars(), encodeURIComponent()). Show before/after code.'
+            },
+            {
+                'title': 'Prompt 2: Implement Content Security Policy',
+                'text': 'Add a strict Content Security Policy (CSP) to my application. Configure: default-src \\'self\\', script-src \\'self\\' (no unsafe-inline), style-src \\'self\\' \\'unsafe-inline\\', img-src \\'self\\' data: https:, block all eval(). Show implementation for my framework (Flask/Express/Laravel/Django) with proper headers and meta tags.'
+            },
+            {
+                'title': 'Prompt 3: Sanitize User Input',
+                'text': 'Implement comprehensive input sanitization for XSS prevention. Create sanitization functions that: remove <script> tags, strip event handlers (onclick, onerror), encode special characters (<, >, ", \\', &), validate against whitelist patterns. Use DOMPurify for client-side, bleach/sanitize-html for server-side. Show implementation.'
+            },
+            {
+                'title': 'Prompt 4: Fix React/Vue XSS',
+                'text': 'Review my React/Vue components for XSS vulnerabilities. Find and fix: dangerouslySetInnerHTML usage, v-html directives, direct DOM manipulation, unescaped props. Replace with safe alternatives: use textContent, sanitize HTML with DOMPurify, use framework built-in escaping. Show secure component examples.'
+            },
+            {
+                'title': 'Prompt 5: Add Template Auto-Escaping',
+                'text': 'Enable and configure auto-escaping in my template engine (Jinja2/EJS/Blade/Twig). Ensure: auto-escaping is enabled by default, context-aware escaping for HTML/JS/CSS, safe filters for trusted content, no raw/unescape unless necessary. Show configuration and template examples.'
+            },
+            {
+                'title': 'Prompt 6: Implement XSS Protection Headers',
+                'text': 'Add all XSS protection HTTP headers to my application: X-XSS-Protection: 1; mode=block, X-Content-Type-Options: nosniff, X-Frame-Options: DENY, Referrer-Policy: strict-origin-when-cross-origin. Show implementation for my web server (Nginx/Apache) and application framework.'
+            },
+            {
+                'title': 'Prompt 7: Security Audit & Testing',
+                'text': 'Perform comprehensive XSS security audit on my codebase. Check: all user input points, output contexts, template rendering, JavaScript DOM manipulation, third-party libraries. Provide: vulnerability report, severity ratings, fix recommendations, test cases, secure coding guidelines.'
+            }
+        ]
+        
+        for prompt in prompts:
+            elements.append(Paragraph(f"<b>{prompt['title']}</b>", self.styles['Heading3']))
+            
+            prompt_table = Table([[prompt['text']]], colWidths=[6.5*inch])
+            prompt_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#f0f9ff')),
+                ('BOX', (0, 0), (-1, -1), 2, colors.HexColor('#0891b2')),
+                ('LEFTPADDING', (0, 0), (-1, -1), 12),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+                ('TOPPADDING', (0, 0), (-1, -1), 12),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+                ('FONTSIZE', (0, 0), (-1, -1), 9)
+            ]))
+            
+            elements.append(prompt_table)
+            elements.append(Spacer(1, 0.2*inch))
+        
+        return elements
+    
+    def _create_framework_code_examples(self):
+        """6 framework secure code examples"""
+        elements = []
+        
+        elements.append(Paragraph("💻 SECURE CODE EXAMPLES (6 Frameworks)", self.styles['SectionHeader']))
+        elements.append(Spacer(1, 0.2*inch))
+        
+        examples = [
+            {
+                'framework': '1. Python (Flask + Jinja2)',
+                'vulnerable': '# ❌ VULNERABLE\\nfrom flask import request\\n@app.route(\"/search\")\\ndef search():\\n    query = request.args.get(\"q\")\\n    return f\"<h1>Results: {query}</h1>\"',
+                'secure': '# ✅ SECURE\\nfrom flask import request, escape\\n@app.route(\"/search\")\\ndef search():\\n    query = request.args.get(\"q\")\\n    return f\"<h1>Results: {escape(query)}</h1>\"'
+            },
+            {
+                'framework': '2. Node.js (Express + EJS)',
+                'vulnerable': '// ❌ VULNERABLE\\napp.get(\"/search\", (req, res) => {\\n  const query = req.query.q;\\n  res.send(`<h1>Results: ${query}</h1>`);\\n});',
+                'secure': '// ✅ SECURE\\nconst escapeHtml = require(\"escape-html\");\\napp.get(\"/search\", (req, res) => {\\n  const query = escapeHtml(req.query.q);\\n  res.send(`<h1>Results: ${query}</h1>`);\\n});'
+            },
+            {
+                'framework': '3. React (JavaScript)',
+                'vulnerable': '// ❌ VULNERABLE\\nfunction Search({ query }) {\\n  return <div dangerouslySetInnerHTML={{__html: query}} />;\\n}',
+                'secure': '// ✅ SECURE\\nfunction Search({ query }) {\\n  return <div>{query}</div>; // React auto-escapes\\n}'
+            },
+            {
+                'framework': '4. PHP (Laravel Blade)',
+                'vulnerable': '<!-- ❌ VULNERABLE -->\\n<h1>Results: {!! $query !!}</h1>',
+                'secure': '<!-- ✅ SECURE -->\\n<h1>Results: {{ $query }}</h1>'
+            },
+            {
+                'framework': '5. Java (Spring Boot + Thymeleaf)',
+                'vulnerable': '<!-- ❌ VULNERABLE -->\\n<h1 th:utext=\"\\'Results: \\' + ${query}\"></h1>',
+                'secure': '<!-- ✅ SECURE -->\\n<h1 th:text=\"\\'Results: \\' + ${query}\"></h1>'
+            },
+            {
+                'framework': '6. Ruby (Rails ERB)',
+                'vulnerable': '<!-- ❌ VULNERABLE -->\\n<h1>Results: <%= raw @query %></h1>',
+                'secure': '<!-- ✅ SECURE -->\\n<h1>Results: <%= @query %></h1>'
+            }
+        ]
+        
+        for example in examples:
+            elements.append(Paragraph(f"<b>{example['framework']}</b>", self.styles['Heading3']))
+            elements.append(Spacer(1, 0.1*inch))
+            
+            elements.append(Paragraph("<font color='red'><b>Vulnerable:</b></font>", self.styles['BodyText']))
+            elements.append(Paragraph(
+                f"<font face='Courier' size='7'>{example['vulnerable']}</font>",
+                self.styles['BodyText']
+            ))
+            elements.append(Spacer(1, 0.1*inch))
+            
+            elements.append(Paragraph("<font color='green'><b>Secure:</b></font>", self.styles['BodyText']))
+            elements.append(Paragraph(
+                f"<font face='Courier' size='7'>{example['secure']}</font>",
+                self.styles['BodyText']
+            ))
+            elements.append(Spacer(1, 0.25*inch))
+        
+        return elements

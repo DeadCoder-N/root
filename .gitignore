@@ -23,3 +23,29 @@ dist-ssr
 .env
 
 .fake
+
+# Archived folders - ignore all archived content
+archived/
+*/archived/
+**/archived/
+
+# ReportLab - Ignore archived folder and Reports
+ReportLab/archived/
+ReportLab/Reports/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Generated reports
+*.pdf
+reports/*.pdf
+*/reports/*.pdf

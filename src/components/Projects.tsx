@@ -1,6 +1,10 @@
 import { ExternalLink, Github, Shield, Globe, Terminal, Lock } from 'lucide-react';
+import { useState } from 'react';
+import ScannerModal from './ScannerModal';
 
 export default function Projects() {
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  
   const projects = [
     {
       title: 'Vulnerability Scanner',
@@ -10,8 +14,8 @@ export default function Projects() {
       technologies: ['Python', 'BeautifulSoup', 'Requests', 'Threading'],
       icon: Shield,
       color: 'from-accent-teal to-cyan-500',
-      github: 'https://github.com',
-      live: null,
+      github: 'https://github.com/deadcoder-n/root',
+      live: 'scanner',
       highlights: ['Scans 50+ vulnerability types', 'Generates detailed reports', 'Multi-threaded scanning'],
     },
     {
@@ -154,15 +158,25 @@ export default function Projects() {
                     </a>
                   )}
                   {project.live && (
-                    <a
-                      href={project.live}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center space-x-2 text-text-secondary hover:text-accent-teal transition-colors"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      <span className="text-sm">Live Demo</span>
-                    </a>
+                    project.live === 'scanner' ? (
+                      <button
+                        onClick={() => setIsScannerOpen(true)}
+                        className="flex items-center space-x-2 text-text-secondary hover:text-accent-teal transition-colors"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        <span className="text-sm">Try Demo</span>
+                      </button>
+                    ) : (
+                      <a
+                        href={project.live}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center space-x-2 text-text-secondary hover:text-accent-teal transition-colors"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        <span className="text-sm">Live Demo</span>
+                      </a>
+                    )
                   )}
                 </div>
               </div>
@@ -182,6 +196,8 @@ export default function Projects() {
           </a>
         </div>
       </div>
+      
+      <ScannerModal isOpen={isScannerOpen} onClose={() => setIsScannerOpen(false)} />
     </section>
   );
 }

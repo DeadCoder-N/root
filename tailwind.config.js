@@ -5,7 +5,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: 'var(--bg-primary)',
+        primary: 'var(--accent-teal)',
         secondary: 'var(--bg-secondary)',
         tertiary: 'var(--bg-tertiary)',
         'text-primary': 'var(--text-primary)',
@@ -18,6 +18,10 @@ export default {
         'accent-pink': 'var(--accent-pink)',
         'accent-gold': 'var(--accent-gold)',
         'accent-green': 'var(--accent-green)',
+        background: 'var(--bg-primary)',
+        foreground: 'var(--text-primary)',
+        input: 'var(--bg-tertiary)',
+        ring: 'var(--accent-teal)',
       },
     },
   },

@@ -18,14 +18,19 @@ import LoadingScreen from './components/LoadingScreen';
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
+  /* 
+   * LOADING SCREEN DISABLED - 2024-12-20 05:17 IST
+   * Reason: Unnecessary delay in content visibility, impacts user experience
+   * and Core Web Vitals (LCP). Users prefer immediate access to content.
+   */
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     setIsLoading(false);
+  //   }, 2000);
+  //   return () => clearTimeout(timer);
+  // }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -85,7 +90,7 @@ function App() {
 
   return (
     <>
-      {isLoading && <LoadingScreen />}
+      {/* {isLoading && <LoadingScreen />} */}
       <div className="min-h-screen bg-primary text-text-primary">
         <AnimatedBackground />
         <ParticleSystem />

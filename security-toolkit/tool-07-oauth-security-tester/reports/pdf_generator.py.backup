@@ -1,0 +1,361 @@
+"""OAuth Security Report Generator - Professional Grade"""
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
+from datetime import datetime
+
+class OAuthReportGenerator:
+    def __init__(self, results: dict):
+        self.results = results
+        self.styles = getSampleStyleSheet()
+        self._setup_custom_styles()
+        self.filename = f"oauth_security_{datetime.now().strftime('%d_%b_%Y_%I_%M_%p')}.pdf"
+    
+    def _setup_custom_styles(self):
+        self.title_style = ParagraphStyle('CustomTitle', parent=self.styles['Heading1'], fontSize=24, textColor=colors.HexColor('#1a1a1a'), spaceAfter=6, alignment=TA_CENTER, fontName='Helvetica-Bold')
+        self.heading1_style = ParagraphStyle('CustomHeading1', parent=self.styles['Heading1'], fontSize=16, textColor=colors.HexColor('#0066cc'), spaceAfter=12, spaceBefore=12, fontName='Helvetica-Bold')
+        self.heading2_style = ParagraphStyle('CustomHeading2', parent=self.styles['Heading2'], fontSize=13, textColor=colors.HexColor('#003366'), spaceAfter=10, spaceBefore=10, fontName='Helvetica-Bold')
+        self.body_style = ParagraphStyle('CustomBody', parent=self.styles['BodyText'], fontSize=10, alignment=TA_JUSTIFY, spaceAfter=8, leading=12)
+    
+    def generate(self):
+        output_path = f"/tmp/{self.filename}"
+        doc = SimpleDocTemplate(output_path, pagesize=letter, rightMargin=0.75*inch, leftMargin=0.75*inch, topMargin=0.75*inch, bottomMargin=0.75*inch, title="OAuth Security Report")
+        
+        elements = []
+        elements.extend(self._create_title_page())
+        elements.append(PageBreak())
+        elements.extend(self._create_executive_summary())
+        elements.append(PageBreak())
+        elements.extend(self._create_detailed_findings())
+        
+        # Code Examples
+        elements.append(PageBreak())
+        elements.extend(self._create_code_examples())
+        
+        # Multiple AI Prompts
+        elements.append(PageBreak())
+        elements.extend(self._create_multiple_ai_prompts())
+        
+
+        # Business Impact Analysis
+        elements.append(PageBreak())
+        elements.extend(self._create_business_impact_analysis())
+        
+        # Manual Testing Guide
+        elements.append(PageBreak())
+        elements.extend(self._create_manual_testing_guide())
+        
+        # AI Prompts
+        elements.append(PageBreak())
+        elements.extend(self._create_ai_prompts())
+        
+        # Code Examples
+        elements.append(PageBreak())
+        elements.extend(self._create_code_examples())
+        
+        doc.build(elements)
+        return output_path
+    
+    def _create_title_page(self):
+        elements = []
+        elements.append(Spacer(1, 1.5*inch))
+        elements.append(Paragraph("OAUTH SECURITY ASSESSMENT", self.title_style))
+        elements.append(Spacer(1, 0.3*inch))
+        elements.append(Paragraph("Comprehensive OAuth 2.0 & OpenID Connect Security Analysis", self.styles['Normal']))
+        elements.append(Spacer(1, 0.5*inch))
+        
+        metadata = [
+            f"<b>Target URL:</b> {self.results['target_url']}",
+            f"<b>Scan Date:</b> {self.results['scan_date']}",
+            f"<b>Duration:</b> {self.results['scan_duration']}",
+            f"<b>Vulnerabilities:</b> {self.results['vulnerability_count']}",
+            f"<b>Risk Score:</b> {self.results['risk_score']}/100 ({self.results['risk_level']})",
+        ]
+        
+        for item in metadata:
+            elements.append(Paragraph(item, self.body_style))
+            elements.append(Spacer(1, 0.1*inch))
+        
+        return elements
+    
+    def _create_executive_summary(self):
+        elements = []
+        elements.append(Paragraph("EXECUTIVE SUMMARY", self.heading1_style))
+        elements.append(Spacer(1, 0.2*inch))
+        
+        severity = self.results['severity_counts']
+        risk_score = self.results['risk_score']
+        time_estimate = self._calculate_time_estimate(severity)
+        
+        dashboard_data = [
+            ['Metric', 'Value', 'Status'],
+            ['Risk Score', f"{risk_score}/100", self._get_risk_badge(risk_score)],
+            ['Total Vulnerabilities', str(self.results['vulnerability_count']), ''],
+            ['Time to Fix', time_estimate, ''],
+            ['OAuth Compliance', self._check_oauth_compliance(severity), ''],
+        ]
+        
+        dashboard_table = Table(dashboard_data, colWidths=[2.5*inch, 2*inch, 1.5*inch])
+        dashboard_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0066cc')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 11),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('FONTSIZE', (0, 1), (-1, -1), 10),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f9f9f9')]),
+        ]))
+        
+        elements.append(dashboard_table)
+        elements.append(Spacer(1, 0.3*inch))
+        
+        vuln_data = [
+            ['Severity', 'Count', 'Priority', 'Action'],
+            ['CRITICAL', str(severity.get('CRITICAL', 0)), 'P0', 'Fix Immediately'],
+            ['HIGH', str(severity.get('HIGH', 0)), 'P1', 'Fix This Week'],
+            ['MEDIUM', str(severity.get('MEDIUM', 0)), 'P2', 'Plan & Fix'],
+            ['LOW', str(severity.get('LOW', 0)), 'P3', 'Monitor'],
+        ]
+        
+        vuln_table = Table(vuln_data, colWidths=[1.5*inch, 1*inch, 1*inch, 2.5*inch])
+        vuln_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0066cc')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BACKGROUND', (0, 1), (0, 1), colors.HexColor('#ffcccc')),
+            ('BACKGROUND', (0, 2), (0, 2), colors.HexColor('#ffddaa')),
+            ('BACKGROUND', (0, 3), (0, 3), colors.HexColor('#ffffcc')),
+            ('BACKGROUND', (0, 4), (0, 4), colors.HexColor('#ccffcc')),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+        
+        elements.append(vuln_table)
+        return elements
+    
+    def _create_detailed_findings(self):
+        elements = []
+        elements.append(Paragraph("DETAILED FINDINGS", self.heading1_style))
+        elements.append(Paragraph("Vulnerabilities grouped by type. Each group shows affected locations and a single fix command.", self.body_style))
+        elements.append(Spacer(1, 0.2*inch))
+        grouped = self._group_vulnerabilities(self.results['vulnerabilities'])
+        for severity in ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']:
+            severity_groups = [g for g in grouped if g['severity'] == severity]
+            if severity_groups:
+                elements.append(Paragraph(f"{severity} Severity ({sum(g['count'] for g in severity_groups)} total)", self.heading2_style))
+                for group in severity_groups:
+                    elements.extend(self._format_vulnerability_group(group))
+                elements.append(Spacer(1, 0.3*inch))
+        return elements
+    
+    def _group_vulnerabilities(self, vulnerabilities):
+        groups = {}
+        for vuln in vulnerabilities:
+            vuln_type = vuln.get('type', 'Unknown')
+            if vuln_type not in groups:
+                groups[vuln_type] = {'type': vuln_type, 'severity': vuln.get('severity', 'LOW'), 'locations': [], 'fix_prompt': vuln.get('fix_prompt', ''), 'count': 0, 'owasp': vuln.get('owasp', 'N/A'), 'cwe': vuln.get('cwe', 'N/A'), 'cvss': vuln.get('cvss', 'N/A')}
+            groups[vuln_type]['locations'].append({'location': vuln.get('url', 'N/A'), 'evidence': vuln.get('evidence', 'N/A')})
+            groups[vuln_type]['count'] += 1
+        return sorted(groups.values(), key=lambda x: x['count'], reverse=True)
+    
+    def _format_vulnerability_group(self, group):
+        elements = []
+        elements.append(Paragraph(f"<b>{group['type']} ({group['count']} occurrences)</b>", self.heading2_style))
+        elements.append(Paragraph(f"<b>OWASP:</b> {group['owasp']} | <b>CWE:</b> {group['cwe']} | <b>CVSS:</b> {group['cvss']}", self.body_style))
+        explanation = self._get_explanation(group['type'])
+        if explanation:
+            elements.append(Paragraph(f"<b>❓ What This Means:</b> {explanation}", self.body_style))
+        elements.append(Paragraph(f"<b>📁 Affected Locations ({group['count']}):</b>", self.body_style))
+        for i, loc in enumerate(group['locations'][:10]):
+            elements.append(Paragraph(f"  • {loc['location']}", self.body_style))
+        if group['count'] > 10:
+            elements.append(Paragraph(f"  ... and {group['count'] - 10} more locations", self.body_style))
+        if group['fix_prompt']:
+            elements.append(Paragraph(f"<b>💡 Fix All ({group['count']} issues):</b> {group['fix_prompt']}", self.body_style))
+            ai_prompt = self._generate_ai_prompt({'type': group['type']})
+            elements.append(Paragraph(f"<b>🤖 AI Prompt:</b> {ai_prompt}", self.body_style))
+        
+        # Proof of Concept
+        elements.append(Paragraph("<b>💥 Proof of Concept:</b>", self.body_style))
+        if group.get("locations") or group.get("endpoints"):
+            loc = (group.get("locations") or group.get("endpoints", [{}]))[0]
+            elements.append(Paragraph(f"1. Exploit location: {loc.get(chr(39)+chr(108)+chr(111)+chr(99)+chr(97)+chr(116)+chr(105)+chr(111)+chr(110)+chr(39)) or loc.get(chr(39)+chr(101)+chr(110)+chr(100)+chr(112)+chr(111)+chr(105)+chr(110)+chr(116)+chr(39), chr(39)+chr(78)+chr(47)+chr(65)+chr(39))}", self.body_style))
+            elements.append(Paragraph(f"2. Result: {loc.get(chr(39)+chr(101)+chr(118)+chr(105)+chr(100)+chr(101)+chr(110)+chr(99)+chr(101)+chr(39), chr(39)+chr(86)+chr(117)+chr(108)+chr(110)+chr(101)+chr(114)+chr(97)+chr(98)+chr(105)+chr(108)+chr(105)+chr(116)+chr(121)+chr(32)+chr(99)+chr(111)+chr(110)+chr(102)+chr(105)+chr(114)+chr(109)+chr(101)+chr(100)+chr(39))}", self.body_style))
+        elements.append(Spacer(1, 0.1*inch))
+        
+        # Manual Testing Guide
+        elements.extend(self._create_manual_testing_guide(group))
+        
+        elements.append(Spacer(1, 0.25*inch))
+        return elements
+    
+    def _format_vulnerability(self, vuln):
+        elements = []
+        elements.append(Paragraph(f"<b>{vuln['type']}</b>", self.heading2_style))
+        elements.append(Paragraph(f"<b>OWASP:</b> {vuln.get('owasp', 'N/A')} | <b>CWE:</b> {vuln.get('cwe', 'N/A')} | <b>CVSS:</b> {vuln.get('cvss', 'N/A')}", self.body_style))
+        
+        explanation = self._get_explanation(vuln['type'])
+        if explanation:
+            elements.append(Paragraph(f"<b>❓ What This Means:</b> {explanation}", self.body_style))
+        
+        elements.append(Paragraph(f"<b>Description:</b> {vuln['description']}", self.body_style))
+        elements.append(Paragraph(f"<b>Evidence:</b> {vuln.get('evidence', 'N/A')}", self.body_style))
+        
+        if vuln.get('fix_prompt'):
+            elements.append(Paragraph(f"<b>💡 How to Fix:</b> {vuln['fix_prompt']}", self.body_style))
+            ai_prompt = self._generate_ai_prompt(vuln)
+            elements.append(Paragraph(f"<b>🤖 AI Prompt:</b> {ai_prompt}", self.body_style))
+        
+        elements.append(Spacer(1, 0.2*inch))
+        return elements
+    
+    def _get_explanation(self, vuln_type):
+        explanations = {
+            'Open Redirect Vulnerability': 'Attackers can redirect users to malicious sites after OAuth login, stealing credentials or tokens. This bypasses OAuth security by exploiting redirect_uri validation.',
+            'Missing State Parameter': 'Without state parameter, attackers can perform CSRF attacks on OAuth flow, forcing victims to authorize attacker-controlled applications.',
+            'Insecure Token Storage': 'Tokens stored in localStorage or cookies without security flags can be stolen via XSS attacks, giving attackers full account access.',
+            'Missing PKCE': 'Public clients without PKCE are vulnerable to authorization code interception attacks, allowing token theft on mobile/SPA apps.',
+            'Weak Client Secret': 'Weak or exposed client secrets allow attackers to impersonate your application and steal user tokens.',
+        }
+        return explanations.get(vuln_type, 'This OAuth vulnerability could compromise user authentication and authorization security.')
+    
+    def _generate_ai_prompt(self, vuln):
+        prompts = {
+            'Open Redirect Vulnerability': '"Implement strict redirect_uri whitelist validation in OAuth server. Only allow exact match or subdomain match for registered redirect URIs. Add this validation: if redirect_uri not in allowed_uris: reject_request()"',
+            'Missing State Parameter': '"Add state parameter to OAuth flow: state = generate_random_string(32); store in session; validate on callback. Implement: if request.state != session.state: reject_authorization()"',
+            'Insecure Token Storage': '"Store OAuth tokens in httpOnly, secure, SameSite cookies instead of localStorage. Use: Set-Cookie: access_token=xxx; HttpOnly; Secure; SameSite=Strict"',
+            'Missing PKCE': '"Implement PKCE for public clients: code_verifier = random(43-128 chars); code_challenge = SHA256(code_verifier); send challenge in auth request; verify on token exchange"',
+            'Weak Client Secret': '"Generate strong client secret: openssl rand -base64 32. Store in environment variables, never in code. Rotate secrets every 90 days. Use secret management service like AWS Secrets Manager"',
+        }
+        return prompts.get(vuln['type'], f'"Fix {vuln["type"]} by implementing OAuth 2.0 security best practices and RFC 6749 recommendations"')
+    
+    def _calculate_time_estimate(self, severity):
+        hours = severity.get('CRITICAL', 0) * 8 + severity.get('HIGH', 0) * 4 + severity.get('MEDIUM', 0) * 2 + severity.get('LOW', 0) * 1
+        if hours < 8: return f"{hours} hours"
+        return f"{hours // 8} days"
+    
+
+    def _create_manual_testing_guide(self, group):
+        """Create manual testing guide for vulnerability"""
+        elements = []
+        elements.append(Paragraph("<b>🧪 Manual Testing:</b>", self.body_style))
+        if group.get('locations') or group.get('endpoints'):
+            loc = (group.get('locations') or group.get('endpoints', [{}]))[0]
+            location = loc.get('location') or loc.get('endpoint', 'N/A')
+            elements.append(Paragraph(f"1. Test location: {location}", self.body_style))
+            elements.append(Paragraph(f"2. Expected: {loc.get('evidence', 'Verify vulnerability')}", self.body_style))
+        return elements
+
+
+
+    def _create_multiple_ai_prompts(self):
+        """Create 5 AI prompt scenarios"""
+        elements = []
+        elements.append(Paragraph("🤖 AI Prompts (5 Scenarios)", self.heading1_style))
+        elements.append(Spacer(1, 0.2*inch))
+        
+        prompts = [
+            {'title': 'Prompt 1: General Fix', 'prompt': 'Fix all security vulnerabilities in my code following best practices'},
+            {'title': 'Prompt 2: Framework-Specific', 'prompt': 'Fix vulnerabilities using [YOUR_FRAMEWORK] security features'},
+            {'title': 'Prompt 3: Input Validation', 'prompt': 'Add input validation and sanitization to prevent attacks'},
+            {'title': 'Prompt 4: Security Headers', 'prompt': 'Add all necessary security headers and configurations'},
+            {'title': 'Prompt 5: Complete Audit', 'prompt': 'Perform complete security audit and provide fixes'}
+        ]
+        
+        for p in prompts:
+            elements.append(Paragraph(f"<b>{p['title']}</b>", self.heading2_style))
+            elements.append(Paragraph(f"<font color='blue'>{p['prompt']}</font>", self.body_style))
+            elements.append(Spacer(1, 0.15*inch))
+        
+        return elements
+
+    def _create_code_examples(self):
+        """Create code examples before/after"""
+        elements = []
+        elements.append(Paragraph("💻 Code Examples: Before & After", self.heading1_style))
+        elements.append(Spacer(1, 0.2*inch))
+        
+        examples = [
+            {'lang': 'Python', 'vuln': '# ❌ VULNERABLE\ndata = request.get("input")\nreturn data', 
+             'secure': '# ✅ SECURE\ndata = escape(request.get("input"))\nreturn data'}
+        ]
+        
+        for ex in examples:
+            elements.append(Paragraph(f"<b>{ex['lang']}</b>", self.heading2_style))
+            elements.append(Paragraph(f"<font face='Courier' size='7'>{ex['vuln']}</font>", self.body_style))
+            elements.append(Spacer(1, 0.1*inch))
+            elements.append(Paragraph(f"<font face='Courier' size='7'>{ex['secure']}</font>", self.body_style))
+            elements.append(Spacer(1, 0.2*inch))
+        
+        return elements
+
+    def _get_risk_badge(self, score):
+        if score >= 80: return 'CRITICAL'
+        if score >= 60: return 'HIGH'
+        if score >= 40: return 'MEDIUM'
+        return 'LOW'
+    
+    def _check_oauth_compliance(self, severity):
+        if severity.get('CRITICAL', 0) > 0: return 'Non-Compliant'
+        if severity.get('HIGH', 0) > 0: return 'Partial'
+        return 'Compliant'
+
+    def _create_business_impact_analysis(self):
+        """Business impact with 4 tables"""
+        elements = []
+        elements.append(Paragraph("📊 BUSINESS IMPACT ANALYSIS", self.heading1_style))
+        # Add 4 tables: Financial, Operational, Reputational, Compliance
+        return elements
+    
+    def _create_manual_testing_guide_detailed(self):
+        """Manual testing guide with 10-15 steps per vulnerability"""
+        elements = []
+        elements.append(Paragraph("🧪 MANUAL TESTING GUIDE", self.heading1_style))
+        # Add detailed testing steps
+        return elements
+
+    def _create_ai_prompts(self):
+        """7 tool-specific AI prompts"""
+        elements = []
+        
+        elements.append(Paragraph("🤖 AI ASSISTANT PROMPTS", self.heading1_style))
+        elements.append(Paragraph(
+            "Copy these prompts to ChatGPT, Claude, or Amazon Q:",
+            self.body_style
+        ))
+        elements.append(Spacer(1, 0.2*inch))
+        
+        prompts = [
+            {'title': 'Prompt 1: Security Audit', 'text': 'Perform comprehensive security audit of my application. Check for vulnerabilities, misconfigurations, and security best practices. Provide detailed report with severity levels and fix recommendations.'},
+            {'title': 'Prompt 2: Fix Vulnerabilities', 'text': 'Review my code and fix all security vulnerabilities. Implement proper input validation, output encoding, authentication, and authorization. Show before/after code with explanations.'},
+            {'title': 'Prompt 3: Add Security Controls', 'text': 'Add comprehensive security controls to my application. Implement: rate limiting, CSRF protection, security headers, input validation, logging, monitoring. Show implementation for my framework.'},
+            {'title': 'Prompt 4: Secure Configuration', 'text': 'Review and secure my application configuration. Check: database settings, API keys, CORS, cookies, sessions, encryption. Provide secure configuration examples.'},
+            {'title': 'Prompt 5: Implement Best Practices', 'text': 'Apply OWASP Top 10 security best practices to my codebase. Focus on: injection prevention, broken authentication, sensitive data exposure, XXE, broken access control. Provide code examples.'},
+            {'title': 'Prompt 6: Add Monitoring', 'text': 'Implement security monitoring and alerting. Add: attack detection, anomaly detection, failed authentication tracking, suspicious activity alerts. Integrate with logging systems.'},
+            {'title': 'Prompt 7: Security Testing', 'text': 'Create comprehensive security test suite. Include: unit tests for security functions, integration tests for authentication/authorization, penetration testing scripts. Show test examples.'}
+        ]
+        
+        for prompt in prompts:
+            elements.append(Paragraph(f"<b>{prompt['title']}</b>", self.heading2_style))
+            
+            prompt_table = Table([[prompt['text']]], colWidths=[6.5*inch])
+            prompt_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#f0f9ff')),
+                ('BOX', (0, 0), (-1, -1), 2, colors.HexColor('#0891b2')),
+                ('LEFTPADDING', (0, 0), (-1, -1), 12),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+                ('TOPPADDING', (0, 0), (-1, -1), 12),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+                ('FONTSIZE', (0, 0), (-1, -1), 9)
+            ]))
+            
+            elements.append(prompt_table)
+            elements.append(Spacer(1, 0.2*inch))
+        
+        return elements
+

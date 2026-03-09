@@ -1,142 +1,220 @@
-import { Shield, Terminal, Lock, Search, Activity, Wifi } from 'lucide-react';
+import { Shield, Terminal, Lock, Search, Activity, Wifi, Code, Key, Globe, Upload, AlertTriangle, Database, Server, Cloud, FileCode, Zap } from 'lucide-react';
 import { useState } from 'react';
+import CodeAnalyzerModal from './CodeAnalyzerModal';
+import SQLInjectionModal from './SQLInjectionModal';
+import XSSModal from './XSSModal';
+import APISecurityModal from './APISecurityModal';
+import JWTAnalyzerModal from './JWTAnalyzerModal';
+import AuthenticationModal from './AuthenticationModal';
+import OAuthModal from './OAuthModal';
+import SessionModal from './SessionModal';
+import WebCrawlerModal from './WebCrawlerModal';
+import SSLScannerModal from './SSLScannerModal';
+import PortScannerModal from './PortScannerModal';
+import DNSAnalyzerModal from './DNSAnalyzerModal';
+import FileUploadModal from './FileUploadModal';
+import CSRFModal from './CSRFModal';
+import XXEModal from './XXEModal';
+import BusinessLogicModal from './BusinessLogicModal';
+import CommandInjectionModal from './CommandInjectionModal';
 
 export default function SecurityTools() {
   const [activeDemo, setActiveDemo] = useState<string | null>(null);
+  const [isAnalyzerOpen, setIsAnalyzerOpen] = useState(false);
+  const [isSQLInjectionOpen, setIsSQLInjectionOpen] = useState(false);
+  const [isXSSOpen, setIsXSSOpen] = useState(false);
+  const [isAPISecurityOpen, setIsAPISecurityOpen] = useState(false);
+  const [isJWTAnalyzerOpen, setIsJWTAnalyzerOpen] = useState(false);
+  const [isAuthenticationOpen, setIsAuthenticationOpen] = useState(false);
+  const [isOAuthOpen, setIsOAuthOpen] = useState(false);
+  const [isSessionOpen, setIsSessionOpen] = useState(false);
+  const [isWebCrawlerOpen, setIsWebCrawlerOpen] = useState(false);
+  const [isSSLScannerOpen, setIsSSLScannerOpen] = useState(false);
+  const [isPortScannerOpen, setIsPortScannerOpen] = useState(false);
+  const [isDNSAnalyzerOpen, setIsDNSAnalyzerOpen] = useState(false);
+  const [isFileUploadOpen, setIsFileUploadOpen] = useState(false);
+  const [isCSRFOpen, setIsCSRFOpen] = useState(false);
+  const [isXXEOpen, setIsXXEOpen] = useState(false);
+  const [isBusinessLogicOpen, setIsBusinessLogicOpen] = useState(false);
+  const [isCommandInjectionOpen, setIsCommandInjectionOpen] = useState(false);
 
   const tools = [
+    // ============================================
+    // EXISTING TOOLS (1-3) - Keep as is
+    // ============================================
     {
-      id: 'port-scanner',
-      icon: Search,
-      name: 'Port Scanner',
-      category: 'Reconnaissance',
-      description: 'Simulate network port scanning to identify open ports and services',
+      id: 'code-analyzer',
+      icon: Code,
+      name: 'Vulnerability Scanner',
+      category: 'SAST Tool',
+      description: 'Production-grade security scanner. Detects secrets, vulnerabilities, outdated dependencies in GitHub repos',
       color: 'from-accent-teal to-cyan-500',
-      demo: {
-        title: 'Nmap Scan Simulation',
-        code: `nmap -sV -sC 192.168.1.1
-
-Starting Nmap scan...
-PORT     STATE  SERVICE     VERSION
-22/tcp   open   ssh         OpenSSH 8.2
-80/tcp   open   http        Apache 2.4.41
-443/tcp  open   ssl/https   Apache 2.4.41
-3306/tcp closed mysql
-
-Scan complete. 3 open ports found.`,
-      },
+      isLive: true,
+      port: 5001,
     },
     {
       id: 'sql-injection',
       icon: Lock,
       name: 'SQL Injection Tester',
       category: 'Web Security',
-      description: 'Demonstrate SQL injection vulnerabilities and prevention techniques',
+      description: 'Production-grade SQL injection scanner. Tests for error-based, union-based, and time-based SQLi',
       color: 'from-accent-purple to-pink-500',
-      demo: {
-        title: 'SQL Injection Detection',
-        code: `Testing payload: admin' OR '1'='1
-
-[!] Vulnerability detected!
-Input: admin' OR '1'='1
-Query: SELECT * FROM users WHERE username='admin' OR '1'='1'
-Status: VULNERABLE
-
-Fix: Use parameterized queries
-$stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
-$stmt->execute([$username]);`,
-      },
-    },
-    {
-      id: 'password-hash',
-      icon: Shield,
-      name: 'Password Hasher',
-      category: 'Cryptography',
-      description: 'Hash passwords using various algorithms (MD5, SHA256, bcrypt)',
-      color: 'from-accent-pink to-red-500',
-      demo: {
-        title: 'Password Hashing',
-        code: `Input: MySecurePass123
-
-MD5:     5f4dcc3b5aa765d61d8327deb882cf99
-SHA256:  a665a45920422f9d417e4867efdc4fb8a0
-bcrypt:  $2b$10$N9qo8uLOickgx2ZMRZoMy.
-
-Recommendation: Use bcrypt or Argon2
-Time to crack MD5:     < 1 second
-Time to crack bcrypt:  Years`,
-      },
+      isLive: true,
+      port: 5002,
     },
     {
       id: 'xss-detector',
       icon: Terminal,
-      name: 'XSS Vulnerability Scanner',
+      name: 'XSS Scanner',
       category: 'Web Security',
-      description: 'Detect Cross-Site Scripting vulnerabilities in web applications',
+      description: 'Production-grade XSS scanner. Detects reflected, stored, and DOM-based Cross-Site Scripting',
       color: 'from-accent-gold to-yellow-500',
-      demo: {
-        title: 'XSS Detection',
-        code: `Testing payload: <script>alert('XSS')</script>
-
-[!] XSS Vulnerability Found!
-Type: Reflected XSS
-Location: search parameter
-Risk: HIGH
-
-Remediation:
-1. Sanitize user input
-2. Encode output
-3. Use Content Security Policy
-4. Validate on server-side`,
-      },
+      isLive: true,
+      port: 5003,
+    },
+    
+    // ============================================
+    // NEW TOOLS (4-17) - Added systematically
+    // ============================================
+    {
+      id: 'api-security',
+      icon: Database,
+      name: 'API Security Tester',
+      category: 'API Security',
+      description: 'Test APIs for BOLA, authentication, mass assignment, rate limiting, and OWASP API Top 10',
+      color: 'from-blue-500 to-indigo-500',
+      isLive: true,
+      port: 5004,
     },
     {
-      id: 'network-sniffer',
+      id: 'jwt-analyzer',
+      icon: Key,
+      name: 'JWT Analyzer',
+      category: 'Authentication',
+      description: 'Analyze JWT tokens for algorithm none attack, weak secrets, expiration, and signature validation',
+      color: 'from-purple-500 to-pink-500',
+      isLive: true,
+      port: 5005,
+    },
+    {
+      id: 'auth-analyzer',
+      icon: Shield,
+      name: 'Authentication Analyzer',
+      category: 'Authentication',
+      description: 'Test authentication mechanisms for brute force, password policy, session management, and 2FA',
+      color: 'from-red-500 to-orange-500',
+      isLive: true,
+      port: 5006,
+    },
+    {
+      id: 'oauth-tester',
+      icon: Lock,
+      name: 'OAuth Security Tester',
+      category: 'Authentication',
+      description: 'Test OAuth flows for state parameter, redirect URI, PKCE, code injection, and token leakage',
+      color: 'from-green-500 to-teal-500',
+      isLive: true,
+      port: 5007,
+    },
+    {
+      id: 'session-analyzer',
       icon: Activity,
-      name: 'Packet Analyzer',
-      category: 'Network Security',
-      description: 'Capture and analyze network packets in real-time',
-      color: 'from-accent-green to-emerald-500',
-      demo: {
-        title: 'Packet Capture',
-        code: `Capturing packets on eth0...
-
-Frame 1: HTTP Request
-Source: 192.168.1.100
-Dest: 93.184.216.34
-Protocol: HTTP/1.1
-GET /index.html HTTP/1.1
-
-Frame 2: TCP Handshake
-SYN -> SYN-ACK -> ACK
-Connection established
-
-Total packets captured: 1,247`,
-      },
+      name: 'Session Analyzer',
+      category: 'Web Security',
+      description: 'Analyze session management for fixation, CSRF, cookie security, and timeout issues',
+      color: 'from-yellow-500 to-amber-500',
+      isLive: true,
+      port: 5008,
     },
     {
-      id: 'wifi-audit',
-      icon: Wifi,
-      name: 'WiFi Security Auditor',
-      category: 'Wireless Security',
-      description: 'Audit wireless networks for security vulnerabilities',
-      color: 'from-blue-500 to-cyan-500',
-      demo: {
-        title: 'WiFi Security Audit',
-        code: `Scanning wireless networks...
-
-SSID: HomeNetwork
-BSSID: 00:11:22:33:44:55
-Security: WPA2-PSK
-Signal: -45 dBm
-Status: SECURE
-
-SSID: GuestWiFi
-Security: WEP
-Status: VULNERABLE (Weak encryption)
-
-Recommendation: Upgrade to WPA3`,
-      },
+      id: 'web-crawler',
+      icon: Globe,
+      name: 'Web Crawler',
+      category: 'Reconnaissance',
+      description: 'Crawl websites to map endpoints, extract links, detect forms, clickjacking, and open redirects',
+      color: 'from-cyan-500 to-blue-500',
+      isLive: true,
+      port: 5009,
+    },
+    {
+      id: 'ssl-scanner',
+      icon: Lock,
+      name: 'SSL/TLS Scanner',
+      category: 'Network Security',
+      description: 'Scan SSL/TLS configurations for certificate validation, weak protocols, and cipher suites',
+      color: 'from-indigo-500 to-purple-500',
+      isLive: true,
+      port: 5010,
+    },
+    {
+      id: 'port-scanner',
+      icon: Search,
+      name: 'Port Scanner',
+      category: 'Reconnaissance',
+      description: 'Scan network ports for open services, banner grabbing, and service detection',
+      color: 'from-pink-500 to-rose-500',
+      isLive: true,
+      port: 5011,
+    },
+    {
+      id: 'dns-analyzer',
+      icon: Server,
+      name: 'DNS Analyzer',
+      category: 'Network Security',
+      description: 'Analyze DNS records, DNSSEC, SPF, DMARC, and zone transfer vulnerabilities',
+      color: 'from-teal-500 to-green-500',
+      isLive: true,
+      port: 5012,
+    },
+    {
+      id: 'file-upload',
+      icon: Upload,
+      name: 'File Upload Tester',
+      category: 'Web Security',
+      description: 'Test file upload functionality for extension validation, MIME type, size limits, and path traversal',
+      color: 'from-orange-500 to-red-500',
+      isLive: true,
+      port: 5013,
+    },
+    {
+      id: 'csrf-tester',
+      icon: AlertTriangle,
+      name: 'CSRF Tester',
+      category: 'Web Security',
+      description: 'Test for CSRF vulnerabilities, token validation, SameSite cookies, and CORS policy',
+      color: 'from-red-500 to-pink-500',
+      isLive: true,
+      port: 5014,
+    },
+    {
+      id: 'xxe-scanner',
+      icon: FileCode,
+      name: 'XXE Scanner',
+      category: 'Web Security',
+      description: 'Scan for XML External Entity vulnerabilities, file reading, XML bomb, and SSRF via XXE',
+      color: 'from-purple-500 to-indigo-500',
+      isLive: true,
+      port: 5015,
+    },
+    {
+      id: 'business-logic',
+      icon: Zap,
+      name: 'Business Logic Tester',
+      category: 'Application Security',
+      description: 'Test business logic for race conditions, price manipulation, negative values, and parameter tampering',
+      color: 'from-yellow-500 to-orange-500',
+      isLive: true,
+      port: 5016,
+    },
+    {
+      id: 'command-injection',
+      icon: Terminal,
+      name: 'Command Injection Scanner',
+      category: 'Web Security',
+      description: 'Scan for OS command injection, path traversal, and local file inclusion vulnerabilities',
+      color: 'from-red-500 to-rose-500',
+      isLive: true,
+      port: 5017,
     },
   ];
 
@@ -145,19 +223,30 @@ Recommendation: Upgrade to WPA3`,
       <div className="container mx-auto px-6">
         <div className="text-center mb-16 fade-in">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Security <span className="gradient-text">Tools Demo</span>
+            Security <span className="gradient-text">Tools Suite</span>
           </h2>
           <p className="text-text-muted max-w-2xl mx-auto">
-            Interactive demonstrations of common cybersecurity tools and techniques
+            Professional-grade cybersecurity testing toolkit with 17 specialized tools
           </p>
+          <div className="mt-4 flex justify-center gap-4 text-sm">
+            <span className="px-4 py-2 bg-accent-teal/10 border border-accent-teal/30 rounded-full text-accent-teal">
+              17 Tools Available
+            </span>
+            <span className="px-4 py-2 bg-accent-purple/10 border border-accent-purple/30 rounded-full text-accent-purple">
+              59+ Features
+            </span>
+            <span className="px-4 py-2 bg-accent-gold/10 border border-accent-gold/30 rounded-full text-accent-gold">
+              Production Ready
+            </span>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tools.map((tool, index) => (
             <div
               key={tool.id}
-              className="glass-card p-6 space-y-4 cursor-pointer fade-in"
-              style={{ animationDelay: `${index * 0.1}s` }}
+              className="glass-card p-6 space-y-4 cursor-pointer fade-in hover:scale-105 transition-transform"
+              style={{ animationDelay: `${index * 0.05}s` }}
               onClick={() => setActiveDemo(activeDemo === tool.id ? null : tool.id)}
             >
               <div className="flex items-start justify-between">
@@ -176,30 +265,74 @@ Recommendation: Upgrade to WPA3`,
                 </p>
               </div>
 
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-text-muted font-mono">
+                  Port: {tool.port}
+                </span>
+                <span className="text-xs px-2 py-1 bg-green-500/10 border border-green-500/30 rounded text-green-500">
+                  ● Live
+                </span>
+              </div>
+
               <button
+                onClick={(e) => {
+                  if (tool.isLive) {
+                    e.stopPropagation();
+                    if (tool.id === 'code-analyzer') setIsAnalyzerOpen(true);
+                    else if (tool.id === 'sql-injection') setIsSQLInjectionOpen(true);
+                    else if (tool.id === 'xss-detector') setIsXSSOpen(true);
+                    else if (tool.id === 'api-security') setIsAPISecurityOpen(true);
+                    else if (tool.id === 'jwt-analyzer') setIsJWTAnalyzerOpen(true);
+                    else if (tool.id === 'auth-analyzer') setIsAuthenticationOpen(true);
+                    else if (tool.id === 'oauth-tester') setIsOAuthOpen(true);
+                    else if (tool.id === 'session-analyzer') setIsSessionOpen(true);
+                    else if (tool.id === 'web-crawler') setIsWebCrawlerOpen(true);
+                    else if (tool.id === 'ssl-scanner') setIsSSLScannerOpen(true);
+                    else if (tool.id === 'port-scanner') setIsPortScannerOpen(true);
+                    else if (tool.id === 'dns-analyzer') setIsDNSAnalyzerOpen(true);
+                    else if (tool.id === 'file-upload') setIsFileUploadOpen(true);
+                    else if (tool.id === 'csrf-tester') setIsCSRFOpen(true);
+                    else if (tool.id === 'xxe-scanner') setIsXXEOpen(true);
+                    else if (tool.id === 'business-logic') setIsBusinessLogicOpen(true);
+                    else if (tool.id === 'command-injection') setIsCommandInjectionOpen(true);
+                  }
+                }}
                 className={`w-full py-2 rounded-lg font-medium text-sm transition-all ${
-                  activeDemo === tool.id
-                    ? 'bg-gradient-to-r from-accent-teal to-accent-purple text-white'
+                  tool.isLive
+                    ? 'bg-gradient-to-r from-accent-teal to-accent-purple text-white hover:shadow-lg hover:shadow-accent-teal/50'
                     : 'bg-tertiary text-text-secondary hover:bg-tertiary/80'
                 }`}
               >
-                {activeDemo === tool.id ? 'Hide Demo' : 'View Demo'}
+                {tool.isLive ? '🚀 Launch Tool' : 'Coming Soon'}
               </button>
-
-              {activeDemo === tool.id && (
-                <div className="mt-4 bg-primary border border-accent-teal/30 rounded-lg overflow-hidden">
-                  <div className="bg-tertiary px-4 py-2 border-b border-accent-teal/30">
-                    <p className="text-sm font-semibold text-accent-teal">{tool.demo.title}</p>
-                  </div>
-                  <pre className="p-4 text-xs font-mono text-text-secondary overflow-x-auto whitespace-pre-wrap leading-relaxed">
-                    {tool.demo.code}
-                  </pre>
-                </div>
-              )}
             </div>
           ))}
         </div>
+
+        <div className="mt-12 text-center">
+          <p className="text-text-muted text-sm">
+            All tools are production-ready with comprehensive error handling, PDF reports, and fix prompts
+          </p>
+        </div>
       </div>
+      
+      <CodeAnalyzerModal isOpen={isAnalyzerOpen} onClose={() => setIsAnalyzerOpen(false)} />
+      <SQLInjectionModal isOpen={isSQLInjectionOpen} onClose={() => setIsSQLInjectionOpen(false)} />
+      <XSSModal isOpen={isXSSOpen} onClose={() => setIsXSSOpen(false)} />
+      <APISecurityModal isOpen={isAPISecurityOpen} onClose={() => setIsAPISecurityOpen(false)} />
+      <JWTAnalyzerModal isOpen={isJWTAnalyzerOpen} onClose={() => setIsJWTAnalyzerOpen(false)} />
+      <AuthenticationModal isOpen={isAuthenticationOpen} onClose={() => setIsAuthenticationOpen(false)} />
+      <OAuthModal isOpen={isOAuthOpen} onClose={() => setIsOAuthOpen(false)} />
+      <SessionModal isOpen={isSessionOpen} onClose={() => setIsSessionOpen(false)} />
+      <WebCrawlerModal isOpen={isWebCrawlerOpen} onClose={() => setIsWebCrawlerOpen(false)} />
+      <SSLScannerModal isOpen={isSSLScannerOpen} onClose={() => setIsSSLScannerOpen(false)} />
+      <PortScannerModal isOpen={isPortScannerOpen} onClose={() => setIsPortScannerOpen(false)} />
+      <DNSAnalyzerModal isOpen={isDNSAnalyzerOpen} onClose={() => setIsDNSAnalyzerOpen(false)} />
+      <FileUploadModal isOpen={isFileUploadOpen} onClose={() => setIsFileUploadOpen(false)} />
+      <CSRFModal isOpen={isCSRFOpen} onClose={() => setIsCSRFOpen(false)} />
+      <XXEModal isOpen={isXXEOpen} onClose={() => setIsXXEOpen(false)} />
+      <BusinessLogicModal isOpen={isBusinessLogicOpen} onClose={() => setIsBusinessLogicOpen(false)} />
+      <CommandInjectionModal isOpen={isCommandInjectionOpen} onClose={() => setIsCommandInjectionOpen(false)} />
     </section>
   );
 }

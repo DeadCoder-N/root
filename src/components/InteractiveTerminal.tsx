@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Terminal as TerminalIcon, ChevronRight } from 'lucide-react';
+import { InteractiveRobotSpline } from './InteractiveRobotSpline';
 
 interface Command {
   input: string;
@@ -11,6 +12,8 @@ export default function InteractiveTerminal() {
   const [currentInput, setCurrentInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const terminalRef = useRef<HTMLDivElement>(null);
+  
+  const ROBOT_SCENE_URL = "https://prod.spline.design/PyzDhpQ9E5f1E3MT/scene.splinecode";
 
   const commands: { [key: string]: string[] } = {
     help: [
@@ -126,65 +129,76 @@ export default function InteractiveTerminal() {
           </p>
         </div>
 
-        <div className="max-w-4xl mx-auto fade-in">
-          <div className="glass-card overflow-hidden">
-            <div className="bg-tertiary px-4 py-3 flex items-center justify-between border-b border-accent-teal/30">
-              <div className="flex items-center space-x-2">
-                <TerminalIcon className="w-5 h-5 text-accent-teal" />
-                <span className="font-mono text-sm">portfolio@terminal:~</span>
-              </div>
-              <div className="flex space-x-2">
-                <div className="w-3 h-3 rounded-full bg-accent-pink"></div>
-                <div className="w-3 h-3 rounded-full bg-accent-gold"></div>
-                <div className="w-3 h-3 rounded-full bg-accent-green"></div>
-              </div>
+        <div className="max-w-4xl mx-auto fade-in relative">
+          <div className="glass-card overflow-hidden relative">
+            {/* 3D Robot Background - Desktop Only */}
+            <div className="absolute inset-0 z-0">
+              <InteractiveRobotSpline
+                scene={ROBOT_SCENE_URL}
+                className="w-full h-full"
+              />
             </div>
-
-            <div
-              ref={terminalRef}
-              className="bg-primary p-6 h-96 overflow-y-auto font-mono text-sm"
-            >
-              {history.map((cmd, index) => (
-                <div key={index} className="mb-4">
-                  {cmd.input && (
-                    <div className="flex items-center space-x-2 text-accent-teal">
-                      <ChevronRight className="w-4 h-4" />
-                      <span className="text-accent-purple">guest@portfolio</span>
-                      <span className="text-text-muted">:</span>
-                      <span className="text-accent-teal">~</span>
-                      <span className="text-text-muted">$</span>
-                      <span className="text-text-primary">{cmd.input}</span>
-                    </div>
-                  )}
-                  {cmd.output.map((line, i) => (
-                    <div key={i} className="text-text-secondary ml-6 mt-1">
-                      {line}
-                    </div>
-                  ))}
+            
+            {/* Terminal Content - Above Robot */}
+            <div className="relative z-10">
+              <div className="bg-tertiary px-4 py-3 flex items-center justify-between border-b border-accent-teal/30">
+                <div className="flex items-center space-x-2">
+                  <TerminalIcon className="w-5 h-5 text-accent-teal" />
+                  <span className="font-mono text-sm">portfolio@terminal:~</span>
                 </div>
-              ))}
+                <div className="flex space-x-2">
+                  <div className="w-3 h-3 rounded-full bg-accent-pink"></div>
+                  <div className="w-3 h-3 rounded-full bg-accent-gold"></div>
+                  <div className="w-3 h-3 rounded-full bg-accent-green"></div>
+                </div>
+              </div>
 
-              <form onSubmit={handleSubmit} className="flex items-center space-x-2">
-                <ChevronRight className="w-4 h-4 text-accent-teal" />
-                <span className="text-accent-purple">guest@portfolio</span>
-                <span className="text-text-muted">:</span>
-                <span className="text-accent-teal">~</span>
-                <span className="text-text-muted">$</span>
-                <input
-                  type="text"
-                  value={currentInput}
-                  onChange={(e) => setCurrentInput(e.target.value)}
-                  className="flex-1 bg-transparent outline-none text-text-primary"
-                  placeholder="Type a command..."
-                  autoFocus
-                />
-              </form>
-            </div>
+              <div
+                ref={terminalRef}
+                className="bg-primary/50 p-6 h-96 overflow-y-auto font-mono text-sm"
+              >
+                {history.map((cmd, index) => (
+                  <div key={index} className="mb-4">
+                    {cmd.input && (
+                      <div className="flex items-center space-x-2 text-accent-teal">
+                        <ChevronRight className="w-4 h-4" />
+                        <span className="text-accent-purple">guest@portfolio</span>
+                        <span className="text-text-muted">:</span>
+                        <span className="text-accent-teal">~</span>
+                        <span className="text-text-muted">$</span>
+                        <span className="text-text-primary">{cmd.input}</span>
+                      </div>
+                    )}
+                    {cmd.output.map((line, i) => (
+                      <div key={i} className="text-text-secondary ml-6 mt-1">
+                        {line}
+                      </div>
+                    ))}
+                  </div>
+                ))}
 
-            <div className="bg-tertiary px-4 py-2 border-t border-accent-teal/30">
-              <p className="text-xs text-text-muted">
-                Tip: Try commands like "help"!!!
-              </p>
+                <form onSubmit={handleSubmit} className="flex items-center space-x-2">
+                  <ChevronRight className="w-4 h-4 text-accent-teal" />
+                  <span className="text-accent-purple">guest@portfolio</span>
+                  <span className="text-text-muted">:</span>
+                  <span className="text-accent-teal">~</span>
+                  <span className="text-text-muted">$</span>
+                  <input
+                    type="text"
+                    value={currentInput}
+                    onChange={(e) => setCurrentInput(e.target.value)}
+                    className="flex-1 bg-transparent outline-none text-text-primary"
+                    placeholder="Type a command..."
+                    autoFocus
+                  />
+                </form>
+              </div>
+
+              <div className="bg-tertiary px-4 py-2 border-t border-accent-teal/30">
+                <p className="text-xs text-text-muted">
+                  Tip: Try commands like "help"! Interactive 3D robot in background.
+                </p>
+              </div>
             </div>
           </div>
         </div>

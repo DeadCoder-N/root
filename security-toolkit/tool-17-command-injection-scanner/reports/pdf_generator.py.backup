@@ -1,0 +1,188 @@
+"""Command Injection & Path Traversal Report Generator - Professional Grade"""
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
+from datetime import datetime
+
+class CommandInjectionReportGenerator:
+    def __init__(self, results: dict):
+        self.results = results
+        self.styles = getSampleStyleSheet()
+        self._setup_custom_styles()
+        self.filename = f"command_injection_{datetime.now().strftime('%d_%b_%Y_%I_%M_%p')}.pdf"
+    
+    def _setup_custom_styles(self):
+        self.title_style = ParagraphStyle('CustomTitle', parent=self.styles['Heading1'], fontSize=24, textColor=colors.HexColor('#1a1a1a'), spaceAfter=6, alignment=TA_CENTER, fontName='Helvetica-Bold')
+        self.heading1_style = ParagraphStyle('CustomHeading1', parent=self.styles['Heading1'], fontSize=16, textColor=colors.HexColor('#0066cc'), spaceAfter=12, spaceBefore=12, fontName='Helvetica-Bold')
+        self.heading2_style = ParagraphStyle('CustomHeading2', parent=self.styles['Heading2'], fontSize=13, textColor=colors.HexColor('#003366'), spaceAfter=10, spaceBefore=10, fontName='Helvetica-Bold')
+        self.body_style = ParagraphStyle('CustomBody', parent=self.styles['BodyText'], fontSize=10, alignment=TA_JUSTIFY, spaceAfter=8, leading=12)
+    
+    def generate(self):
+        output_path = f"/tmp/{self.filename}"
+        doc = SimpleDocTemplate(output_path, pagesize=letter, rightMargin=0.75*inch, leftMargin=0.75*inch, topMargin=0.75*inch, bottomMargin=0.75*inch)
+        
+        elements = []
+        elements.extend(self._create_title_page())
+        elements.append(PageBreak())
+        elements.extend(self._create_executive_summary())
+        elements.append(PageBreak())
+        elements.extend(self._create_detailed_findings())
+        elements.append(PageBreak())
+        elements.extend(self._create_business_impact())
+        elements.append(PageBreak())
+        elements.extend(self._create_manual_testing())
+        elements.append(PageBreak())
+        elements.extend(self._create_ai_prompts())
+        elements.append(PageBreak())
+        elements.extend(self._create_code_examples())
+        
+        doc.build(elements)
+        return output_path
+    
+    def _create_title_page(self):
+        elements = []
+        elements.append(Spacer(1, 1.5*inch))
+        elements.append(Paragraph("COMMAND INJECTION & PATH TRAVERSAL ASSESSMENT", self.title_style))
+        elements.append(Spacer(1, 0.3*inch))
+        elements.append(Paragraph("OS Command Injection & File System Security Analysis", self.styles['Normal']))
+        elements.append(Spacer(1, 0.5*inch))
+        
+        metadata = [
+            f"<b>Target URL:</b> {self.results['target_url']}",
+            f"<b>Scan Date:</b> {self.results.get('scan_date', datetime.now().strftime('%d %b %Y'))}",
+            f"<b>Vulnerabilities:</b> {self.results['total_vulnerabilities']}",
+        ]
+        
+        for item in metadata:
+            elements.append(Paragraph(item, self.body_style))
+            elements.append(Spacer(1, 0.1*inch))
+        
+        return elements
+    
+    def _create_executive_summary(self):
+        elements = []
+        elements.append(Paragraph("EXECUTIVE SUMMARY", self.heading1_style))
+        elements.append(Spacer(1, 0.2*inch))
+        
+        severity = self.results.get('severity_counts', {})
+        
+        vuln_data = [
+            ['Severity', 'Count', 'Priority', 'Action'],
+            ['CRITICAL', str(severity.get('CRITICAL', 0)), 'P0', 'Fix Immediately'],
+            ['HIGH', str(severity.get('HIGH', 0)), 'P1', 'Fix This Week'],
+            ['MEDIUM', str(severity.get('MEDIUM', 0)), 'P2', 'Plan & Fix'],
+            ['LOW', str(severity.get('LOW', 0)), 'P3', 'Monitor'],
+        ]
+        
+        vuln_table = Table(vuln_data, colWidths=[1.5*inch, 1*inch, 1*inch, 2.5*inch])
+        vuln_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0066cc')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+        
+        elements.append(vuln_table)
+        return elements
+    
+    def _create_detailed_findings(self):
+        elements = []
+        elements.append(Paragraph("DETAILED FINDINGS", self.heading1_style))
+        elements.append(Spacer(1, 0.2*inch))
+        
+        for vuln in self.results.get('vulnerabilities', []):
+            elements.append(Paragraph(f"<b>{vuln['type']}</b>", self.heading2_style))
+            elements.append(Paragraph(f"<b>Severity:</b> {vuln['severity']}", self.body_style))
+            elements.append(Paragraph(f"<b>Description:</b> {vuln['description']}", self.body_style))
+            elements.append(Paragraph(f"<b>Evidence:</b> {vuln.get('evidence', 'N/A')}", self.body_style))
+            elements.append(Spacer(1, 0.2*inch))
+        
+        return elements
+    
+    def _create_business_impact(self):
+        elements = []
+        elements.append(Paragraph("📊 BUSINESS IMPACT ANALYSIS", self.heading1_style))
+        elements.append(Spacer(1, 0.2*inch))
+        
+        financial_data = [
+            ['Impact', 'Low', 'Medium', 'High', 'Critical'],
+            ['Command Injection', '$100K-$500K', '$500K-$2M', '$2M-$10M', '$10M-$50M'],
+            ['Path Traversal', '$50K-$200K', '$200K-$1M', '$1M-$5M', '$5M-$20M'],
+            ['Data Breach', '$75K-$300K', '$300K-$1.5M', '$1.5M-$7M', '$7M-$30M'],
+        ]
+        
+        financial_table = Table(financial_data, colWidths=[1.5*inch, 1.25*inch, 1.25*inch, 1.25*inch, 1.25*inch])
+        financial_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#dc2626')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        
+        elements.append(Paragraph("<b>Financial Impact</b>", self.heading2_style))
+        elements.append(financial_table)
+        
+        return elements
+    
+    def _create_manual_testing(self):
+        elements = []
+        elements.append(Paragraph("🧪 MANUAL TESTING GUIDE", self.heading1_style))
+        elements.append(Spacer(1, 0.2*inch))
+        
+        elements.append(Paragraph("<b>Test 1: Command Injection (10 steps)</b>", self.heading2_style))
+        steps = [
+            '1. Identify input parameters in URL',
+            '2. Test with command separator: ; whoami',
+            '3. Test with pipe: | whoami',
+            '4. Test with command substitution: $(whoami)',
+            '5. Test time-based: ; sleep 5',
+            '6. Observe response time delays',
+            '7. Check for command output in response',
+            '8. Test with different OS commands',
+            '9. Document successful payloads',
+            '10. Rate severity and create PoC'
+        ]
+        for step in steps:
+            elements.append(Paragraph(step, self.body_style))
+        
+        return elements
+    
+    def _create_ai_prompts(self):
+        elements = []
+        elements.append(Paragraph("🤖 AI PROMPTS", self.heading1_style))
+        elements.append(Spacer(1, 0.2*inch))
+        
+        prompts = [
+            {'title': 'Prompt 1: Fix Command Injection', 'text': 'Fix command injection vulnerability. Use input validation, whitelist allowed commands, avoid shell execution. Show secure code.'},
+            {'title': 'Prompt 2: Fix Path Traversal', 'text': 'Fix path traversal vulnerability. Validate file paths, use whitelist, prevent directory traversal. Show secure implementation.'},
+        ]
+        
+        for prompt in prompts:
+            elements.append(Paragraph(f"<b>{prompt['title']}</b>", self.heading2_style))
+            elements.append(Paragraph(prompt['text'], self.body_style))
+            elements.append(Spacer(1, 0.2*inch))
+        
+        return elements
+    
+    def _create_code_examples(self):
+        elements = []
+        elements.append(Paragraph("💻 CODE EXAMPLES", self.heading1_style))
+        elements.append(Spacer(1, 0.2*inch))
+        
+        examples = [
+            {'framework': 'Python', 'vulnerable': '# VULNERABLE\\nimport os\\nos.system(user_input)', 'secure': '# SECURE\\nimport subprocess\\nsubprocess.run([\"ls\", \"-la\"], shell=False)'}
+        ]
+        
+        for example in examples:
+            elements.append(Paragraph(f"<b>{example['framework']}</b>", self.heading2_style))
+            elements.append(Paragraph(f"<font face='Courier' size='7'>{example['vulnerable']}</font>", self.body_style))
+            elements.append(Spacer(1, 0.1*inch))
+            elements.append(Paragraph(f"<font face='Courier' size='7'>{example['secure']}</font>", self.body_style))
+        
+        return elements

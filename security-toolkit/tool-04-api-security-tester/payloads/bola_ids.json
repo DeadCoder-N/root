@@ -1,0 +1,55 @@
+{
+  "bola_test_ids": {
+    "numeric_ids": [
+      1,
+      2,
+      10,
+      100,
+      999,
+      9999,
+      99999,
+      -1,
+      -999,
+      0
+    ],
+    "string_ids": [
+      "admin",
+      "root",
+      "administrator",
+      "system",
+      "test",
+      "user1",
+      "user2"
+    ],
+    "path_traversal": [
+      "../",
+      "../../",
+      "../../../",
+      "..%2F",
+      "..%252F",
+      "....//",
+      "..;/"
+    ],
+    "special_characters": [
+      "'",
+      "\"",
+      ";",
+      "--",
+      "/*",
+      "*/",
+      "||",
+      "&&"
+    ],
+    "uuid_examples": [
+      "00000000-0000-0000-0000-000000000000",
+      "11111111-1111-1111-1111-111111111111",
+      "ffffffff-ffff-ffff-ffff-ffffffffffff"
+    ],
+    "file_paths": [
+      "/etc/passwd",
+      "/etc/shadow",
+      "/var/log/auth.log",
+      "C:\\Windows\\System32\\config\\SAM"
+    ]
+  }
+}

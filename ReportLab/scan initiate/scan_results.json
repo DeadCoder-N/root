@@ -1,0 +1,161 @@
+{
+  "scan_date": "2026-03-07T06:54:14.859161",
+  "repo_path": "/tmp/tmpgksbazlt",
+  "total_vulnerabilities": 19,
+  "severity_breakdown": {
+    "CRITICAL": 1,
+    "HIGH": 18,
+    "MEDIUM": 0,
+    "LOW": 0
+  },
+  "vulnerabilities": [
+    {
+      "type": "Exposed Secret",
+      "severity": "HIGH",
+      "file": ".env",
+      "secret_type": "supabase_url",
+      "value": "https://uijwammfvaduslrxcdap.supabase.co",
+      "cwe": "CWE-798"
+    },
+    {
+      "type": "Exposed Secret",
+      "severity": "CRITICAL",
+      "file": ".env",
+      "secret_type": "supabase_key",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzd...",
+      "cwe": "CWE-798"
+    },
+    {
+      "type": "Outdated Dependency",
+      "severity": "HIGH",
+      "file": "package.json",
+      "package": "@supabase/supabase-js",
+      "version": "^2.39.8",
+      "cwe": "CWE-1104"
+    },
+    {
+      "type": "Outdated Dependency",
+      "severity": "HIGH",
+      "file": "package.json",
+      "package": "react",
+      "version": "^18.2.0",
+      "cwe": "CWE-1104"
+    },
+    {
+      "type": "Outdated Dependency",
+      "severity": "HIGH",
+      "file": "package.json",
+      "package": "react-dom",
+      "version": "^18.2.0",
+      "cwe": "CWE-1104"
+    },
+    {
+      "type": "Outdated Dependency",
+      "severity": "HIGH",
+      "file": "package.json",
+      "package": "react-hot-toast",
+      "version": "^2.4.1",
+      "cwe": "CWE-1104"
+    },
+    {
+      "type": "Outdated Dependency",
+      "severity": "HIGH",
+      "file": "package.json",
+      "package": "react-icons",
+      "version": "^5.5.0",
+      "cwe": "CWE-1104"
+    },
+    {
+      "type": "Outdated Dependency",
+      "severity": "HIGH",
+      "file": "package.json",
+      "package": "react-router-dom",
+      "version": "^6.22.1",
+      "cwe": "CWE-1104"
+    },
+    {
+      "type": "Outdated Dependency",
+      "severity": "HIGH",
+      "file": "package.json",
+      "package": "@types/react",
+      "version": "^18.2.55",
+      "cwe": "CWE-1104"
+    },
+    {
+      "type": "Outdated Dependency",
+      "severity": "HIGH",
+      "file": "package.json",
+      "package": "@types/react-dom",
+      "version": "^18.2.19",
+      "cwe": "CWE-1104"
+    },
+    {
+      "type": "Outdated Dependency",
+      "severity": "HIGH",
+      "file": "package.json",
+      "package": "@vitejs/plugin-react",
+      "version": "^4.2.1",
+      "cwe": "CWE-1104"
+    },
+    {
+      "type": "Outdated Dependency",
+      "severity": "HIGH",
+      "file": "package.json",
+      "package": "eslint-plugin-react",
+      "version": "^7.33.2",
+      "cwe": "CWE-1104"
+    },
+    {
+      "type": "Outdated Dependency",
+      "severity": "HIGH",
+      "file": "package.json",
+      "package": "eslint-plugin-react-hooks",
+      "version": "^4.6.0",
+      "cwe": "CWE-1104"
+    },
+    {
+      "type": "Outdated Dependency",
+      "severity": "HIGH",
+      "file": "package.json",
+      "package": "eslint-plugin-react-refresh",
+      "version": "^0.4.5",
+      "cwe": "CWE-1104"
+    },
+    {
+      "type": "Outdated Dependency",
+      "severity": "HIGH",
+      "file": "package.json",
+      "package": "vite",
+      "version": "^6.3.3",
+      "cwe": "CWE-1104"
+    },
+    {
+      "type": "Missing Security Header",
+      "severity": "HIGH",
+      "file": "index.html",
+      "header": "Content-Security-Policy",
+      "cwe": "CWE-693"
+    },
+    {
+      "type": "Missing Security Header",
+      "severity": "HIGH",
+      "file": "index.html",
+      "header": "X-Frame-Options",
+      "cwe": "CWE-693"
+    },
+    {
+      "type": "Missing Security Header",
+      "severity": "HIGH",
+      "file": "index.html",
+      "header": "X-Content-Type-Options",
+      "cwe": "CWE-693"
+    },
+    {
+      "type": "Missing Security Header",
+      "severity": "HIGH",
+      "file": "index.html",
+      "header": "Strict-Transport-Security",
+      "cwe": "CWE-693"
+    }
+  ]
+}
